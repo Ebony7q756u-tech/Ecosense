@@ -1,0 +1,7185 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8"/>
+
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+
+<title>EcoSense — Personal Carbon Intelligence</title>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
+
+<style>
+
+:root{
+
+  --bg:#070d09;--bg2:#0b1410;--bg3:#0f1b12;
+
+  --s1:#142017;--s2:#1a2b1e;--s3:#213328;
+
+  --b1:#263d2c;--b2:#375545;--b3:#4a7060;
+
+  --g1:#1db954;--g2:#22c55e;--g3:#4ade80;--g4:#86efac;
+
+  --t1:#0d9488;--t2:#14b8a6;
+
+  --a1:#d97706;--a2:#f59e0b;--a3:#fbbf24;
+
+  --r1:#dc2626;--r2:#ef4444;
+
+  --p1:#7c3aed;--p2:#8b5cf6;
+
+  --tx:#e8f5eb;--tx2:#a8c4ad;--tx3:#6b8f72;--tx4:#3d5c43;
+
+  --ff:'Space Grotesk',sans-serif;--fm:'Space Mono',monospace;
+
+  --r16:16px;--r12:12px;--r8:8px;--r6:6px;
+
+  --glow:0 0 40px rgba(29,185,84,.1);
+
+  --glow2:0 0 20px rgba(29,185,84,.25);
+
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+html{scroll-behavior:smooth}
+
+body{background:var(--bg);color:var(--tx);font-family:var(--ff);min-height:100vh;overflow-x:hidden}
+
+body::before{content:'';position:fixed;inset:0;background:
+
+  radial-gradient(ellipse 70% 50% at 15% 0%,rgba(29,185,84,.07) 0%,transparent 60%),
+
+  radial-gradient(ellipse 50% 70% at 85% 100%,rgba(13,148,136,.05) 0%,transparent 60%);
+
+  pointer-events:none;z-index:0}
+
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}
+
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px}
+
+/* -- LAYOUT -- */
+
+.shell{position:relative;z-index:1;display:flex;flex-direction:column;min-height:100vh}
+
+/* -- TOPBAR -- */
+
+.topbar{
+
+  position:sticky;top:0;z-index:200;
+
+  display:flex;align-items:center;justify-content:space-between;
+
+  padding:0 20px;height:60px;
+
+  background:rgba(7,13,9,.9);backdrop-filter:blur(20px);
+
+  border-bottom:1px solid var(--b1)
+
+}
+
+.brand{display:flex;align-items:center;gap:10px}
+
+.brand-logo{
+
+  width:32px;height:32px;border-radius:9px;
+
+  background:linear-gradient(135deg,var(--g1),var(--t1));
+
+  display:flex;align-items:center;justify-content:center;font-size:16px;
+
+  box-shadow:0 0 16px rgba(29,185,84,.4)
+
+}
+
+.brand-name{font-weight:700;font-size:17px;letter-spacing:-.4px}
+
+.brand-name span{color:var(--g2)}
+
+.topbar-right{display:flex;align-items:center;gap:10px}
+
+.streak-pill{
+
+  display:flex;align-items:center;gap:5px;
+
+  background:var(--s1);border:1px solid var(--b1);
+
+  border-radius:20px;padding:5px 12px;
+
+  font-family:var(--fm);font-size:11px;color:var(--a2)
+
+}
+
+.today-score-badge{
+
+  background:var(--s2);border:1px solid var(--b2);
+
+  border-radius:20px;padding:5px 12px;
+
+  font-family:var(--fm);font-size:11px;color:var(--g2)
+
+}
+
+/* -- TABS -- */
+
+.tabs{
+
+  display:flex;gap:2px;padding:10px 20px 0;
+
+  border-bottom:1px solid var(--b1);
+
+  overflow-x:auto;scrollbar-width:none;flex-shrink:0
+
+}
+
+.tabs::-webkit-scrollbar{display:none}
+
+.tab{
+
+  display:flex;align-items:center;gap:6px;padding:8px 16px;
+
+  border-radius:10px 10px 0 0;font-size:13px;font-weight:500;
+
+  color:var(--tx3);cursor:pointer;white-space:nowrap;
+
+  border:1px solid transparent;border-bottom:none;
+
+  background:transparent;transition:all .18s
+
+}
+
+.tab:hover{color:var(--tx2);background:var(--s1)}
+
+.tab.on{color:var(--g2);background:var(--s1);border-color:var(--b1)}
+
+.tab-icon{font-size:14px}
+
+/* -- PAGES -- */
+
+.page{display:none;padding:20px;max-width:1080px;margin:0 auto;width:100%}
+
+.page.on{display:block}
+
+/* -- HEADINGS -- */
+
+.pg-title{font-size:22px;font-weight:700;letter-spacing:-.5px;margin-bottom:4px}
+
+.pg-sub{font-size:13px;color:var(--tx3);margin-bottom:20px}
+
+/* -- GRID -- */
+
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+
+@media(max-width:740px){.g2,.g3,.g4{grid-template-columns:1fr}.page{padding:14px}.tabs{padding:10px 14px 0}.topbar{padding:0 14px}}
+
+/* -- CARD -- */
+
+.card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r16);padding:18px;transition:border-color .2s}
+
+.card:hover{border-color:var(--b2)}
+
+.card.lit{box-shadow:var(--glow);border-color:rgba(29,185,84,.2)}
+
+.clabel{font-family:var(--fm);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3);margin-bottom:8px}
+
+.cval{font-size:30px;font-weight:700;letter-spacing:-1px;line-height:1}
+
+.cunit{font-size:13px;color:var(--tx3);font-weight:400;margin-left:3px}
+
+.cdelta{font-size:12px;margin-top:5px}
+
+.up{color:var(--r2)}.down{color:var(--g2)}.flat{color:var(--tx3)}
+
+/* -- STAT ROW -- */
+
+.stat-row{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--b1)}
+
+.stat-row:last-child{border:none}
+
+.stat-icon{font-size:18px;width:28px;text-align:center}
+
+.stat-body{flex:1}
+
+.stat-name{font-size:13px;font-weight:500}
+
+.stat-note{font-size:11px;color:var(--tx3);margin-top:2px}
+
+.stat-val{font-family:var(--fm);font-size:13px;color:var(--tx2)}
+
+/* -- BUTTONS -- */
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:10px;font-family:var(--ff);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;border:none}
+
+.btn-p{background:linear-gradient(135deg,var(--g1),var(--t1));color:#fff;box-shadow:0 3px 12px rgba(29,185,84,.25)}
+
+.btn-p:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(29,185,84,.35)}
+
+.btn-s{background:var(--s2);border:1px solid var(--b2);color:var(--tx2)}
+
+.btn-s:hover{border-color:var(--g2);color:var(--g2)}
+
+.btn-g{background:transparent;border:1px solid var(--b1);color:var(--tx3)}
+
+.btn-g:hover{color:var(--tx);border-color:var(--b2)}
+
+.btn-sm{padding:6px 13px;font-size:12px;border-radius:8px}
+
+.btn-blk{width:100%;justify-content:center}
+
+.btn-danger{background:transparent;border:1px solid rgba(239,68,68,.3);color:var(--r2)}
+
+.btn-danger:hover{background:rgba(239,68,68,.08)}
+
+/* -- FORM FIELDS -- */
+
+.field{margin-bottom:14px}
+
+.field label{display:block;font-family:var(--fm);font-size:10px;letter-spacing:1px;color:var(--tx3);margin-bottom:5px}
+
+.field input,.field select,.field textarea{
+
+  width:100%;background:var(--s2);border:1px solid var(--b1);
+
+  border-radius:var(--r8);padding:9px 13px;
+
+  color:var(--tx);font-size:14px;font-family:var(--ff);outline:none;
+
+  transition:border-color .2s,box-shadow .2s
+
+}
+
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--g2);box-shadow:0 0 0 3px rgba(29,185,84,.1)}
+
+.field select option{background:var(--bg2)}
+
+.field .hint{font-size:11px;color:var(--tx3);margin-top:4px}
+
+/* -- INPUT GROUP -- */
+
+.input-group{display:flex;gap:8px}
+
+.input-group input{flex:1}
+
+.input-group .unit-label{
+
+  display:flex;align-items:center;padding:0 12px;
+
+  background:var(--s3);border:1px solid var(--b1);border-radius:var(--r8);
+
+  font-family:var(--fm);font-size:11px;color:var(--tx3);white-space:nowrap
+
+}
+
+/* -- RANGE SLIDER -- */
+
+input[type=range]{
+
+  -webkit-appearance:none;width:100%;height:4px;
+
+  background:var(--b1);border-radius:2px;outline:none;
+
+  border:none;padding:0;
+
+}
+
+input[type=range]::-webkit-slider-thumb{
+
+  -webkit-appearance:none;width:16px;height:16px;border-radius:50%;
+
+  background:var(--g2);cursor:pointer;
+
+  box-shadow:0 0 6px rgba(34,197,94,.5)
+
+}
+
+input[type=range]:focus::-webkit-slider-thumb{box-shadow:0 0 0 4px rgba(34,197,94,.2)}
+
+/* -- CO2 PREVIEW BAR -- */
+
+.co2-preview{
+
+  background:var(--s2);border:1px solid var(--b2);
+
+  border-radius:var(--r8);padding:12px 14px;margin-top:10px;
+
+  display:flex;align-items:center;gap:10px
+
+}
+
+.co2-preview-num{font-family:var(--fm);font-size:20px;font-weight:700;color:var(--g2)}
+
+.co2-preview-label{font-size:12px;color:var(--tx3)}
+
+.co2-preview-bar{flex:1;height:6px;background:var(--s3);border-radius:3px;overflow:hidden}
+
+.co2-preview-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--g2),var(--t2));transition:width .4s cubic-bezier(.16,1,.3,1)}
+
+/* -- ACTIVITY SECTION -- */
+
+.act-section{margin-bottom:24px}
+
+.act-section-header{
+
+  display:flex;align-items:center;gap:10px;margin-bottom:14px;
+
+  padding-bottom:10px;border-bottom:1px solid var(--b1)
+
+}
+
+.act-section-icon{
+
+  width:34px;height:34px;border-radius:10px;
+
+  display:flex;align-items:center;justify-content:center;font-size:17px
+
+}
+
+.icon-transport{background:rgba(29,185,84,.15)}
+
+.icon-food{background:rgba(13,148,136,.15)}
+
+.icon-energy{background:rgba(245,158,11,.15)}
+
+.icon-shopping{background:rgba(139,92,246,.15)}
+
+.act-section-title{font-size:15px;font-weight:600}
+
+.act-section-total{margin-left:auto;font-family:var(--fm);font-size:12px;color:var(--g2)}
+
+/* -- ACTIVITY ITEM -- */
+
+.act-item{
+
+  background:var(--s2);border:1px solid var(--b1);
+
+  border-radius:var(--r12);padding:14px;margin-bottom:10px
+
+}
+
+.act-item-top{display:flex;align-items:center;gap:10px;margin-bottom:10px;cursor:pointer}
+
+.act-item-emoji{font-size:18px;width:26px;text-align:center}
+
+.act-item-name{font-size:13px;font-weight:600;flex:1}
+
+.act-item-co2{font-family:var(--fm);font-size:12px;padding:2px 8px;border-radius:20px;background:var(--s3);color:var(--g3)}
+
+.act-item-co2.bad{color:var(--r2);background:rgba(239,68,68,.1)}
+
+.act-item-co2.med{color:var(--a2);background:rgba(245,158,11,.1)}
+
+.act-item-toggle{width:20px;height:20px;border-radius:50%;border:2px solid var(--b2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .15s;flex-shrink:0}
+
+.act-item.selected .act-item-toggle{background:var(--g2);border-color:var(--g2)}
+
+.act-item.selected{border-color:var(--g2);background:var(--s3)}
+
+.act-inputs{display:none;padding-top:10px;border-top:1px solid var(--b1)}
+
+.act-item.selected .act-inputs{display:block}
+
+/* -- SCORE RING -- */
+
+.ring-wrap{display:flex;flex-direction:column;align-items:center;padding:16px 0}
+
+.ring-svg{filter:drop-shadow(0 0 18px rgba(29,185,84,.3))}
+
+/* -- BAR CHART -- */
+
+.barchart{display:flex;flex-direction:column;gap:9px}
+
+.barrow{display:flex;align-items:center;gap:9px}
+
+.barlbl{font-size:11px;color:var(--tx3);width:72px;flex-shrink:0;text-align:right;font-family:var(--fm)}
+
+.bartrack{flex:1;height:7px;background:var(--s3);border-radius:4px;overflow:hidden}
+
+.barfill{height:100%;border-radius:4px;transition:width .9s cubic-bezier(.16,1,.3,1)}
+
+.barval{font-family:var(--fm);font-size:10px;color:var(--tx3);width:50px;flex-shrink:0}
+
+/* -- AI OUTPUT -- */
+
+.ai-box{
+
+  background:var(--s2);border:1px solid var(--b1);
+
+  border-radius:var(--r12);padding:16px;position:relative;
+
+  font-size:14px;line-height:1.75;color:var(--tx2);min-height:70px
+
+}
+
+.ai-badge{
+
+  display:inline-block;background:linear-gradient(135deg,var(--g1),var(--t1));
+
+  color:#fff;font-size:9px;font-family:var(--fm);letter-spacing:1px;
+
+  padding:2px 8px;border-radius:20px;margin-bottom:10px
+
+}
+
+.ai-loading{display:flex;align-items:center;gap:8px;color:var(--tx3);font-size:13px}
+
+.dots span{animation:dot 1.2s infinite}
+
+.dots span:nth-child(2){animation-delay:.2s}
+
+.dots span:nth-child(3){animation-delay:.4s}
+
+@keyframes dot{0%,80%,100%{opacity:.2}40%{opacity:1}}
+
+/* -- CHAT -- */
+
+.chat-wrap{max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-bottom:6px}
+
+.cmsg{padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.6;max-width:88%}
+
+.cmsg.ai{background:var(--s2);border:1px solid var(--b1);align-self:flex-start}
+
+.cmsg.user{background:rgba(29,185,84,.12);border:1px solid rgba(29,185,84,.25);align-self:flex-end;color:var(--g3)}
+
+.chat-row{display:flex;gap:8px;margin-top:12px}
+
+.chat-row input{flex:1}
+
+/* -- CHALLENGE -- */
+
+.ch-item{
+
+  background:var(--s2);border:1px solid var(--b1);border-radius:var(--r12);
+
+  padding:14px;display:flex;align-items:center;gap:12px;transition:all .18s
+
+}
+
+.ch-item.done{opacity:.6;border-color:var(--g1)}
+
+.ch-check{
+
+  width:26px;height:26px;border-radius:50%;border:2px solid var(--b2);
+
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+
+  font-size:12px;transition:all .15s;flex-shrink:0
+
+}
+
+.ch-item.done .ch-check{background:var(--g2);border-color:var(--g2)}
+
+.ch-info{flex:1}
+
+.ch-name{font-size:13px;font-weight:600;margin-bottom:2px}
+
+.ch-meta{font-size:11px;color:var(--tx3)}
+
+.ch-pts{font-family:var(--fm);font-size:12px;color:var(--a2);font-weight:700}
+
+.ch-pbar{height:3px;background:var(--s3);border-radius:2px;margin-top:7px;overflow:hidden}
+
+.ch-pfill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--g2),var(--t2));transition:width .5s}
+
+/* -- COMPARE -- */
+
+.cmp-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--b1)}
+
+.cmp-row:last-child{border:none}
+
+.cmp-lbl{font-size:12px;width:100px;flex-shrink:0}
+
+.cmp-bwrap{flex:1}
+
+.cmp-mbar{height:6px;border-radius:3px;transition:width .8s cubic-bezier(.16,1,.3,1)}
+
+.cmp-val{font-family:var(--fm);font-size:11px;width:60px;text-align:right;flex-shrink:0}
+
+/* -- HISTORY TABLE -- */
+
+.htable{width:100%;border-collapse:collapse}
+
+.htable th{text-align:left;padding:9px 12px;font-family:var(--fm);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx3);border-bottom:1px solid var(--b1)}
+
+.htable td{padding:10px 12px;font-size:12px;border-bottom:1px solid var(--b1);color:var(--tx2)}
+
+.htable tr:hover td{background:var(--s2)}
+
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;font-family:var(--fm)}
+
+.b-g{background:rgba(29,185,84,.15);color:var(--g2)}
+
+.b-a{background:rgba(245,158,11,.15);color:var(--a2)}
+
+.b-r{background:rgba(239,68,68,.15);color:var(--r2)}
+
+/* -- CATEGORY TAG -- */
+
+.ctag{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;font-family:var(--fm)}
+
+.ctag.t{background:rgba(29,185,84,.1);color:var(--g2);border:1px solid rgba(29,185,84,.2)}
+
+.ctag.f{background:rgba(13,148,136,.1);color:var(--t2);border:1px solid rgba(13,148,136,.2)}
+
+.ctag.e{background:rgba(245,158,11,.1);color:var(--a2);border:1px solid rgba(245,158,11,.2)}
+
+.ctag.s{background:rgba(139,92,246,.1);color:var(--p2);border:1px solid rgba(139,92,246,.2)}
+
+/* -- TOAST -- */
+
+#toasts{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:7px}
+
+.toast{
+
+  background:var(--s3);border:1px solid var(--b2);border-radius:10px;
+
+  padding:10px 16px;font-size:13px;
+
+  box-shadow:0 4px 18px rgba(0,0,0,.4);
+
+  animation:tin .25s ease;display:flex;align-items:center;gap:8px
+
+}
+
+.toast.ok{border-color:var(--g1)}
+
+.toast.err{border-color:var(--r2)}
+
+@keyframes tin{from{transform:translateX(40px);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* -- MODAL -- */
+
+.overlay{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:20px}
+
+.overlay.hide{display:none}
+
+.modal{background:var(--bg2);border:1px solid var(--b2);border-radius:var(--r16);padding:28px;max-width:440px;width:100%;box-shadow:var(--glow2)}
+
+.modal-title{font-size:22px;font-weight:700;letter-spacing:-.4px;margin-bottom:6px}
+
+.modal-sub{font-size:13px;color:var(--tx3);margin-bottom:22px;line-height:1.6}
+
+/* -- MISC -- */
+
+hr.div{border:none;border-top:1px solid var(--b1);margin:16px 0}
+
+.mt4{margin-top:4px}.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.mt20{margin-top:20px}.mt24{margin-top:24px}
+
+.mb8{margin-bottom:8px}.mb12{margin-bottom:12px}.mb16{margin-bottom:16px}
+
+.flex{display:flex}.aic{align-items:center}.jb{justify-content:space-between}.gap8{gap:8px}.gap12{gap:12px}
+
+.text-g{color:var(--g2)}.text-a{color:var(--a2)}.text-r{color:var(--r2)}.text-m{color:var(--tx3)}
+
+.fw7{font-weight:700}.mono{font-family:var(--fm)}.sm{font-size:12px}.xs{font-size:11px}
+
+.grad{background:linear-gradient(135deg,var(--g2),var(--t2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+.spinner{width:18px;height:18px;border:2px solid var(--b2);border-top-color:var(--g2);border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* -- PROFILE STAT PILL -- */
+
+.spill{background:var(--s2);border:1px solid var(--b1);border-radius:12px;padding:12px 14px;text-align:center}
+
+.spill .sv{font-size:22px;font-weight:700;font-family:var(--ff)}
+
+.spill .sl{font-size:11px;color:var(--tx3);margin-top:2px}
+
+/* -- SECURE AUTH SCREEN -- */
+
+.auth-screen{
+
+  position:fixed;inset:0;z-index:9999;
+
+  background:var(--bg);
+
+  display:flex;align-items:center;justify-content:center;padding:20px;
+
+}
+
+.auth-screen.hide{display:none}
+
+.auth-card{
+
+  background:var(--bg2);border:1px solid var(--b2);
+
+  border-radius:20px;padding:36px 32px;max-width:400px;width:100%;
+
+  box-shadow:0 0 60px rgba(29,185,84,.1),0 20px 40px rgba(0,0,0,.4);
+
+  position:relative;z-index:1;
+
+}
+
+.auth-logo{
+
+  width:60px;height:60px;border-radius:16px;
+
+  background:linear-gradient(135deg,var(--g1),var(--t1));
+
+  display:flex;align-items:center;justify-content:center;
+
+  font-size:30px;margin:0 auto 16px;
+
+  box-shadow:0 0 24px rgba(29,185,84,.4);
+
+}
+
+.auth-title{font-size:22px;font-weight:700;letter-spacing:-.5px;margin-bottom:6px;text-align:center}
+
+.auth-sub{font-size:13px;color:var(--tx3);margin-bottom:24px;line-height:1.6;text-align:center}
+
+.auth-tabs{display:flex;gap:0;margin-bottom:22px;background:var(--s1);border-radius:10px;padding:3px}
+
+.auth-tab{flex:1;padding:8px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;text-align:center;transition:all .18s;color:var(--tx3);border:none;background:transparent}
+
+.auth-tab.on{background:var(--s3);color:var(--tx);box-shadow:0 1px 4px rgba(0,0,0,.3)}
+
+.auth-view{display:none}.auth-view.on{display:block}
+
+.auth-divider{display:flex;align-items:center;gap:10px;margin:14px 0;color:var(--tx3);font-size:11px}
+
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--b1)}
+
+.guest-btn{
+
+  display:flex;align-items:center;justify-content:center;gap:8px;
+
+  width:100%;padding:10px 20px;border-radius:10px;
+
+  background:transparent;border:1px solid var(--b2);
+
+  font-family:var(--ff);font-size:13px;font-weight:500;color:var(--tx3);
+
+  cursor:pointer;transition:all .18s;
+
+}
+
+.guest-btn:hover{border-color:var(--g2);color:var(--g2)}
+
+.auth-terms{font-size:11px;color:var(--tx3);margin-top:16px;line-height:1.5;text-align:center}
+
+.auth-err{
+
+  background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);
+
+  border-radius:8px;padding:9px 12px;font-size:12px;color:var(--r2);
+
+  margin-bottom:12px;display:none
+
+}
+
+.auth-err.on{display:block}
+
+.auth-ok{
+
+  background:rgba(29,185,84,.1);border:1px solid rgba(29,185,84,.25);
+
+  border-radius:8px;padding:9px 12px;font-size:12px;color:var(--g2);
+
+  margin-bottom:12px;display:none
+
+}
+
+.auth-ok.on{display:block}
+
+.pw-strength{height:3px;border-radius:2px;margin-top:5px;transition:all .3s;background:var(--b1)}
+
+.pw-label{font-size:10px;margin-top:3px;font-family:var(--fm)}
+
+/* Session expiry banner */
+
+.session-banner{
+
+  position:fixed;top:60px;left:0;right:0;z-index:999;
+
+  background:rgba(245,158,11,.15);border-bottom:1px solid rgba(245,158,11,.3);
+
+  padding:8px 20px;display:flex;align-items:center;justify-content:space-between;
+
+  font-size:12px;color:var(--a2);display:none
+
+}
+
+.session-banner.on{display:flex}
+
+/* Lock screen overlay */
+
+.lock-screen{
+
+  position:fixed;inset:0;z-index:8000;
+
+  background:rgba(0,0,0,.85);backdrop-filter:blur(12px);
+
+  display:flex;align-items:center;justify-content:center;padding:20px;
+
+  display:none
+
+}
+
+.lock-screen.on{display:flex}
+
+.lock-card{
+
+  background:var(--bg2);border:1px solid var(--b2);
+
+  border-radius:16px;padding:28px;max-width:360px;width:100%;text-align:center;
+
+  box-shadow:0 0 40px rgba(0,0,0,.6)
+
+}
+
+.lock-icon{font-size:40px;margin-bottom:12px}
+
+.auth-bg-leaves{position:absolute;inset:0;overflow:hidden;pointer-events:none;border-radius:20px}
+
+.auth-bg-leaves span{position:absolute;font-size:60px;opacity:.03;animation:float 8s ease-in-out infinite}
+
+@keyframes float{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-14px) rotate(4deg)}}
+
+/* -- CUSTOM CONFIRM MODAL -- */
+
+.confirm-overlay{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:20px}
+
+.confirm-overlay.on{display:flex}
+
+.confirm-card{background:var(--bg2);border:1px solid var(--b2);border-radius:16px;padding:28px;max-width:380px;width:100%;box-shadow:0 0 40px rgba(0,0,0,.5)}
+
+.confirm-title{font-size:18px;font-weight:700;margin-bottom:10px}
+
+.confirm-body{font-size:13px;color:var(--tx3);line-height:1.6;margin-bottom:22px}
+
+.confirm-actions{display:flex;gap:10px}
+
+.confirm-ok{flex:1;padding:10px;border-radius:10px;border:none;font-family:var(--ff);font-size:13px;font-weight:600;cursor:pointer;background:linear-gradient(135deg,var(--g1),var(--t1));color:#fff}
+
+.confirm-ok.danger{background:var(--r1)}
+
+.confirm-cancel{flex:1;padding:10px;border-radius:10px;border:1px solid var(--b2);font-family:var(--ff);font-size:13px;font-weight:500;cursor:pointer;background:transparent;color:var(--tx2)}
+
+/* -- GUEST LOGIN BANNER -- */
+
+.guest-login-btn{
+
+  display:flex;align-items:center;gap:5px;
+
+  background:rgba(29,185,84,.12);border:1px solid rgba(29,185,84,.3);
+
+  border-radius:20px;padding:5px 12px;
+
+  font-family:var(--fm);font-size:11px;color:var(--g2);cursor:pointer;
+
+  transition:all .15s;white-space:nowrap
+
+}
+
+.guest-login-btn:hover{background:rgba(29,185,84,.2)}
+
+/* -- ONBOARDING STEPS -- */
+
+.ob-step{display:none}.ob-step.on{display:block}
+
+.ob-progress{display:flex;gap:6px;margin-bottom:20px}
+
+.ob-dot{flex:1;height:3px;border-radius:2px;background:var(--b1);transition:background .3s}
+
+.ob-dot.done{background:var(--g2)}
+
+/* -- QUICK LOG BTN -- */
+
+.quicklog-fab{
+
+  position:fixed;bottom:24px;right:24px;z-index:500;
+
+  width:52px;height:52px;border-radius:50%;
+
+  background:linear-gradient(135deg,var(--g1),var(--t1));
+
+  box-shadow:0 4px 20px rgba(29,185,84,.45);
+
+  display:flex;align-items:center;justify-content:center;
+
+  font-size:22px;cursor:pointer;border:none;
+
+  transition:transform .2s,box-shadow .2s
+
+}
+
+.quicklog-fab:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(29,185,84,.6)}
+
+/* -- IMPACT STORY -- */
+
+.impact-story{
+
+  background:var(--s2);border:1px solid var(--b1);
+
+  border-radius:var(--r12);padding:14px;
+
+  display:flex;gap:12px;align-items:flex-start
+
+}
+
+.impact-icon{font-size:26px;flex-shrink:0}
+
+.impact-title{font-size:13px;font-weight:600;margin-bottom:3px}
+
+.impact-text{font-size:12px;color:var(--tx3);line-height:1.5}
+
+/* -- EARTH DOTS -- */
+
+.edots{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px}
+
+.edot{width:9px;height:9px;border-radius:50%;background:var(--s3);border:1px solid var(--b1);transition:all .3s}
+
+.edot.on{background:var(--g2);box-shadow:0 0 5px var(--g2);border-color:var(--g2)}
+
+/* -- REPORT BOX -- */
+
+.report-box{
+
+  background:var(--s2);border:1px solid var(--b2);
+
+  border-radius:var(--r12);padding:18px;
+
+  white-space:pre-wrap;font-size:13px;line-height:1.8;color:var(--tx2)
+
+}
+
+/* -- SLIDER LABEL -- */
+
+.slider-val{
+
+  display:inline-block;background:var(--s3);border:1px solid var(--b2);
+
+  border-radius:6px;padding:2px 10px;
+
+  font-family:var(--fm);font-size:13px;color:var(--g2);margin-left:8px
+
+}
+
+/* -- WEEKLY DOTS -- */
+
+.wdots{display:flex;gap:6px}
+
+.wdot{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+
+.wdot-circle{
+
+  width:30px;height:30px;border-radius:50%;
+
+  display:flex;align-items:center;justify-content:center;font-size:13px;
+
+  border:1px solid var(--b1);background:var(--s2)
+
+}
+
+.wdot-circle.logged{background:var(--g2);border-color:var(--g2);color:#fff}
+
+.wdot-lbl{font-size:9px;color:var(--tx3);font-family:var(--fm)}
+
+/* -- DARK / LIGHT TOGGLE -- */
+
+body.light{
+
+  --bg:#f0faf2;--bg2:#e8f5eb;--bg3:#dff0e3;
+
+  --s1:#d4ebda;--s2:#c8e4ce;--s3:#b8d9bf;
+
+  --b1:#9ec9a8;--b2:#7db88a;--b3:#5ea370;
+
+  --tx:#1a2e1d;--tx2:#2d4d32;--tx3:#4a7a52;--tx4:#6b9b72;
+
+}
+
+body.light .topbar{background:rgba(240,250,242,.92)}
+
+body.light .auth-screen{background:var(--bg)}
+
+/* -- OFFLINE BADGE -- */
+
+.offline-banner{
+
+  position:fixed;bottom:0;left:0;right:0;z-index:8999;
+
+  background:rgba(245,158,11,.9);color:#1a1a00;
+
+  padding:8px 20px;font-size:12px;font-weight:600;
+
+  text-align:center;display:none;backdrop-filter:blur(6px)
+
+}
+
+.offline-banner.on{display:block}
+
+/* -- VOICE INPUT -- */
+
+.voice-btn{
+
+  width:44px;height:44px;border-radius:50%;border:none;cursor:pointer;
+
+  background:linear-gradient(135deg,var(--g1),var(--t1));
+
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+
+  box-shadow:0 0 16px rgba(29,185,84,.4);transition:all .2s;flex-shrink:0
+
+}
+
+.voice-btn.listening{animation:voicePulse 1s infinite;background:linear-gradient(135deg,var(--r1),#f97316)}
+
+@keyframes voicePulse{0%,100%{box-shadow:0 0 16px rgba(239,68,68,.4)}50%{box-shadow:0 0 30px rgba(239,68,68,.7),0 0 60px rgba(239,68,68,.3)}}
+
+.voice-transcript{
+
+  background:var(--s2);border:1px dashed var(--g2);border-radius:var(--r8);
+
+  padding:10px 14px;font-size:13px;color:var(--tx2);min-height:40px;
+
+  font-style:italic;margin-top:10px;display:none
+
+}
+
+.voice-transcript.on{display:block}
+
+/* -- PHOTO SCAN -- */
+
+.scan-drop{
+
+  border:2px dashed var(--b2);border-radius:var(--r12);padding:28px;
+
+  text-align:center;cursor:pointer;transition:all .2s;position:relative;overflow:hidden
+
+}
+
+.scan-drop:hover,.scan-drop.drag{border-color:var(--g2);background:rgba(29,185,84,.04)}
+
+.scan-drop input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+
+.scan-preview{width:100%;max-height:200px;object-fit:contain;border-radius:var(--r8);margin-top:10px;display:none}
+
+.scan-preview.on{display:block}
+
+/* -- SHARE CARD -- */
+
+.share-card-preview{
+
+  background:linear-gradient(135deg,#0a1f0d,#1a3d20);
+
+  border:1px solid var(--g1);border-radius:16px;padding:24px;
+
+  max-width:380px;margin:0 auto;position:relative;overflow:hidden
+
+}
+
+.share-card-preview::before{
+
+  content:'';position:absolute;inset:0;
+
+  background:radial-gradient(ellipse 80% 60% at 30% 20%,rgba(29,185,84,.15),transparent);
+
+  pointer-events:none
+
+}
+
+.share-score-big{font-size:56px;font-weight:700;letter-spacing:-3px;color:var(--g2);line-height:1}
+
+.share-watermark{position:absolute;bottom:14px;right:16px;font-size:10px;color:var(--tx3);font-family:var(--fm)}
+
+/* -- CITY MODE -- */
+
+.city-chip{
+
+  display:inline-flex;align-items:center;gap:5px;padding:5px 12px;
+
+  border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;
+
+  background:var(--s2);border:1px solid var(--b1);color:var(--tx2);transition:all .15s
+
+}
+
+.city-chip.on{background:rgba(29,185,84,.12);border-color:var(--g2);color:var(--g2)}
+
+.city-chip:hover:not(.on){border-color:var(--b2);color:var(--tx)}
+
+/* -- GOALS RING -- */
+
+.goal-ring-wrap{position:relative;width:120px;height:120px;flex-shrink:0}
+
+.goal-ring-wrap svg{position:absolute;inset:0}
+
+.goal-ring-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+
+/* -- TUTORIAL TOOLTIP -- */
+
+.tutorial-overlay{position:fixed;inset:0;z-index:7000;pointer-events:none}
+
+.tutorial-tip{
+
+  position:fixed;z-index:7001;background:var(--g1);color:#fff;
+
+  border-radius:12px;padding:12px 16px;font-size:13px;max-width:240px;
+
+  box-shadow:0 4px 20px rgba(29,185,84,.5);pointer-events:auto;
+
+  animation:tipPop .3s cubic-bezier(.16,1,.3,1)
+
+}
+
+@keyframes tipPop{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+
+.tutorial-tip::after{
+
+  content:'';position:absolute;width:10px;height:10px;background:var(--g1);
+
+  transform:rotate(45deg);bottom:-5px;left:20px
+
+}
+
+.tutorial-skip{font-size:11px;opacity:.7;cursor:pointer;margin-top:8px;display:inline-block}
+
+.tutorial-highlight{
+
+  border-radius:12px;
+
+  box-shadow:0 0 0 4px var(--g1);
+
+  transition:all .4s cubic-bezier(.16,1,.3,1)
+
+}
+
+/* -- OFFSET LINKS -- */
+
+.offset-link{
+
+  display:flex;align-items:center;gap:12px;padding:12px;
+
+  background:var(--s2);border:1px solid var(--b1);border-radius:var(--r8);
+
+  text-decoration:none;transition:all .15s;margin-bottom:8px
+
+}
+
+.offset-link:hover{border-color:var(--g2);transform:translateX(2px)}
+
+.offset-link-icon{font-size:22px;flex-shrink:0}
+
+.offset-link-body{flex:1}
+
+.offset-link-name{font-size:13px;font-weight:600;color:var(--tx)}
+
+.offset-link-desc{font-size:11px;color:var(--tx3);margin-top:2px}
+
+.offset-link-price{font-family:var(--fm);font-size:11px;color:var(--g2);white-space:nowrap}
+
+/* -- PDF EXPORT BTN -- */
+
+.pdf-export-wrap{background:linear-gradient(135deg,var(--s1),var(--s2));border:1px solid var(--b1);border-radius:var(--r12);padding:16px}
+
+/* -- AI DEBATE -- */
+
+.debate-side{padding:12px 14px;border-radius:var(--r8);font-size:13px;line-height:1.6}
+
+.debate-side.user-side{background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.2);color:var(--tx2)}
+
+.debate-side.ai-side{background:rgba(29,185,84,.08);border:1px solid rgba(29,185,84,.2);color:var(--tx2)}
+
+/* -- TREND CANVAS -- */
+
+.trend-wrap{height:150px;position:relative;margin-top:8px}
+
+.trend-wrap canvas{width:100%!important}
+
+/* -- API KEY MANAGER -- */
+
+.apikey-card{border-color:rgba(29,185,84,.15)!important}
+
+.apikey-input-wrap{
+
+  display:flex;align-items:center;gap:8px;
+
+  background:var(--s2);border:1px solid var(--b2);
+
+  border-radius:var(--r8);padding:6px 6px 6px 12px;
+
+  transition:border-color .2s
+
+}
+
+.apikey-input-wrap:focus-within{border-color:var(--g2);box-shadow:0 0 0 3px rgba(29,185,84,.1)}
+
+.apikey-input-icon{font-size:16px;flex-shrink:0;transition:all .2s}
+
+.apikey-input{
+
+  flex:1;background:transparent;border:none;outline:none;
+
+  color:var(--tx);font-size:13px;font-family:var(--fm);
+
+  letter-spacing:.5px;min-width:0
+
+}
+
+.apikey-input::placeholder{color:var(--tx3);font-family:var(--ff);letter-spacing:0;font-size:13px}
+
+.apikey-type-badge{
+
+  padding:3px 10px;border-radius:20px;
+
+  font-size:10px;font-weight:700;font-family:var(--fm);
+
+  letter-spacing:.5px;white-space:nowrap;flex-shrink:0
+
+}
+
+.apikey-type-badge.claude{background:rgba(229,100,50,.15);color:#e56432;border:1px solid rgba(229,100,50,.3)}
+
+.apikey-type-badge.gemini{background:rgba(66,133,244,.15);color:#4285f4;border:1px solid rgba(66,133,244,.3)}
+
+.apikey-type-badge.unknown{background:rgba(245,158,11,.1);color:var(--a2);border:1px solid rgba(245,158,11,.3)}
+
+.apikey-save-btn{flex-shrink:0}
+
+.apikey-save-btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+
+.apikey-hint{font-size:11px;color:var(--tx3);margin-top:8px;display:flex;align-items:center;gap:5px}
+
+.apikey-status-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+
+.apikey-pill{
+
+  display:flex;align-items:center;gap:6px;
+
+  padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;font-family:var(--fm);
+
+  cursor:pointer;transition:all .15s
+
+}
+
+.apikey-pill.claude-pill{background:rgba(229,100,50,.12);color:#e56432;border:1px solid rgba(229,100,50,.25)}
+
+.apikey-pill.gemini-pill{background:rgba(66,133,244,.12);color:#4285f4;border:1px solid rgba(66,133,244,.25)}
+
+.apikey-pill:hover{opacity:.7}
+
+.apikey-pill .pill-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+.apikey-active-item{
+
+  display:flex;align-items:center;gap:10px;
+
+  padding:9px 12px;border-radius:var(--r8);
+
+  background:var(--s2);border:1px solid var(--b1);
+
+  margin-bottom:6px
+
+}
+
+.apikey-active-item:last-child{margin-bottom:0}
+
+.apikey-active-name{font-size:12px;font-weight:600;flex:1}
+
+.apikey-active-val{font-family:var(--fm);font-size:11px;color:var(--tx3);flex:1}
+
+.apikey-remove{
+
+  background:transparent;border:none;color:var(--tx3);cursor:pointer;
+
+  font-size:16px;padding:0 2px;line-height:1;transition:color .15s
+
+}
+
+.apikey-remove:hover{color:var(--r2)}
+
+.apikey-validating{color:var(--a2);font-size:11px;display:flex;align-items:center;gap:5px}
+
+.apikey-valid{color:var(--g2);font-size:11px;display:flex;align-items:center;gap:5px}
+
+.apikey-invalid{color:var(--r2);font-size:11px;display:flex;align-items:center;gap:5px}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- ---------- SECURE AUTH SCREEN ---------- -->
+
+<div class="auth-screen" id="authScreen">
+
+<div class="auth-card">
+
+<div class="auth-bg-leaves">
+
+<span style="top:5%;left:5%;animation-delay:0s">🌿</span>
+
+<span style="top:70%;left:85%;animation-delay:2s">🍃</span>
+
+<span style="top:85%;left:15%;animation-delay:4s">🌱</span>
+
+<span style="top:15%;left:80%;animation-delay:1s">🍀</span>
+
+</div>
+
+<div class="auth-logo">🌍</div>
+
+<div class="auth-title">Welcome to <span class="grad">EcoSense</span></div>
+
+<div class="auth-sub">Track and reduce your carbon footprint with AI</div>
+
+<!-- Login / Register tabs -->
+
+<div class="auth-tabs">
+
+<button class="auth-tab on" id="atab-login" onclick="switchAuthTab('login')">Sign In</button>
+
+<button class="auth-tab" id="atab-register" onclick="switchAuthTab('register')">Create Account</button>
+
+</div>
+
+<!-- Error / Success banners -->
+
+<div class="auth-err" id="authErr"></div>
+
+<div class="auth-ok" id="authOk"></div>
+
+<!-- -- LOGIN VIEW -- -->
+
+<div class="auth-view on" id="aview-login">
+
+<div class="field">
+
+<label>EMAIL</label>
+
+<input type="email" id="login-email" placeholder="you@example.com" autocomplete="email" onkeydown="if(event.key==='Enter')doLogin()"/>
+
+</div>
+
+<div class="field">
+
+<label>PASSWORD</label>
+
+<input type="password" id="login-pw" placeholder="Your password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/>
+
+</div>
+
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+
+<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tx3);cursor:pointer">
+
+<input type="checkbox" id="login-remember" style="accent-color:var(--g2);width:14px;height:14px"/> Remember me (30 days)
+
+</label>
+
+<span style="font-size:12px;color:var(--g2);cursor:pointer" onclick="showForgot()">Forgot password?</span>
+
+</div>
+
+<button class="btn btn-p btn-blk" onclick="doLogin()" id="loginBtn">Sign In →</button>
+
+<div class="auth-divider">or</div>
+
+<button class="guest-btn" onclick="continueAsGuest()">👤 Continue as Guest</button>
+
+</div>
+
+<!-- -- REGISTER VIEW -- -->
+
+<div class="auth-view" id="aview-register">
+
+<div class="field">
+
+<label>FULL NAME</label>
+
+<input type="text" id="reg-name" placeholder="Your name" maxlength="30" autocomplete="name"/>
+
+</div>
+
+<div class="field">
+
+<label>EMAIL</label>
+
+<input type="email" id="reg-email" placeholder="you@example.com" autocomplete="email"/>
+
+</div>
+
+<div class="field">
+
+<label>PASSWORD</label>
+
+<input type="password" id="reg-pw" placeholder="Min 8 characters" autocomplete="new-password" oninput="checkPwStrength(this.value)"/>
+
+<div class="pw-strength" id="pwBar"></div>
+
+<div class="pw-label text-m" id="pwLabel"></div>
+
+</div>
+
+<div class="field">
+
+<label>CONFIRM PASSWORD</label>
+
+<input type="password" id="reg-pw2" placeholder="Repeat password" autocomplete="new-password" onkeydown="if(event.key==='Enter')doRegister()"/>
+
+</div>
+
+<button class="btn btn-p btn-blk" onclick="doRegister()" id="registerBtn">Create Account →</button>
+
+<div class="auth-divider">or</div>
+
+<button class="guest-btn" onclick="continueAsGuest()">👤 Continue as Guest</button>
+
+</div>
+
+<!-- -- FORGOT PASSWORD VIEW -- -->
+
+<div class="auth-view" id="aview-forgot">
+
+<div style="font-size:13px;color:var(--tx3);margin-bottom:14px;line-height:1.6">Enter your registered email — we'll reset your password so you can set a new one on next login.</div>
+
+<div class="field">
+
+<label>REGISTERED EMAIL</label>
+
+<input type="email" id="forgot-email" placeholder="you@example.com"/>
+
+</div>
+
+<button class="btn btn-p btn-blk" onclick="doForgot()">Reset Password</button>
+
+<button class="btn btn-g btn-blk mt8" onclick="switchAuthTab('login')" style="margin-top:8px">← Back to Sign In</button>
+
+</div>
+
+<div class="auth-terms">🔒 Passwords are hashed with SHA-256.</div>
+
+</div>
+
+</div>
+
+<!-- ---------- SESSION EXPIRY BANNER ---------- -->
+
+<div class="session-banner" id="sessionBanner">
+
+<span>⏱️ Session expires in <strong id="sessionCountdown">—</strong> — save your work</span>
+
+<button class="btn btn-sm btn-p" onclick="extendSession()" style="padding:4px 12px;font-size:11px">Extend Session</button>
+
+</div>
+
+<!-- ---------- LOCK SCREEN ---------- -->
+
+<div class="lock-screen" id="lockScreen">
+
+<div class="lock-card">
+
+<div class="lock-icon">🔒</div>
+
+<div style="font-size:18px;font-weight:700;margin-bottom:8px">Session Expired</div>
+
+<div style="font-size:13px;color:var(--tx3);margin-bottom:20px;line-height:1.6">Your 2-hour session has ended for security. Please sign in again to continue — your data is safe.</div>
+
+<button class="btn btn-p btn-blk" onclick="reAuthFromLock()">Sign In Again</button>
+
+</div>
+
+</div>
+
+<!-- ---------- ONBOARDING MODAL ---------- -->
+
+<div class="overlay" id="obModal">
+
+<div class="modal">
+
+<div style="font-size:36px;margin-bottom:12px">🌍</div>
+
+<div class="modal-title">Welcome to <span class="grad">EcoSense</span></div>
+
+<div class="modal-sub">Your personal carbon footprint tracker. Let's get you set up in 3 quick steps.</div>
+
+<div class="ob-progress">
+
+<div class="ob-dot done" id="odot1"></div>
+
+<div class="ob-dot" id="odot2"></div>
+
+<div class="ob-dot" id="odot3"></div>
+
+</div>
+
+<!-- Step 1 -->
+
+<div class="ob-step on" id="ob1">
+
+<div class="field"><label>YOUR NAME</label><input id="ob-name" type="text" placeholder="e.g. Ebony" maxlength="25"/></div>
+
+<div class="field"><label>COUNTRY</label>
+
+<select id="ob-country">
+
+<option value="india">🇮🇳 India</option>
+
+<option value="global">🌍 Global Average</option>
+
+<option value="usa">🇺🇸 United States</option>
+
+<option value="eu">🇪🇺 European Union</option>
+
+<option value="china">🇨🇳 China</option>
+
+<option value="uk">🇬🇧 United Kingdom</option>
+
+</select>
+
+</div>
+
+<button class="btn btn-p btn-blk" onclick="obNext(2)">Next →</button>
+
+</div>
+
+<!-- Step 2 -->
+
+<div class="ob-step" id="ob2">
+
+<div style="font-size:13px;color:var(--tx3);margin-bottom:14px">Help us estimate your baseline. Answer a few quick questions:</div>
+
+<div class="field">
+
+<label>HOW DO YOU MAINLY COMMUTE?</label>
+
+<select id="ob-commute">
+
+<option value="0">🚶 Walk / Cycle — no emissions</option>
+
+<option value="1.2">🚌 Public bus or train</option>
+
+<option value="2.8" selected>🛵 Scooter / bike</option>
+
+<option value="5.5">🚗 Personal car</option>
+
+<option value="15">✈️ Frequent flyer</option>
+
+</select>
+
+</div>
+
+<div class="field">
+
+<label>YOUR USUAL DIET?</label>
+
+<select id="ob-diet">
+
+<option value="0.3">🌱 Vegan</option>
+
+<option value="0.7">🥗 Vegetarian</option>
+
+<option value="1.8" selected>🍗 Meat a few times a week</option>
+
+<option value="3.5">🥩 Daily meat eater</option>
+
+</select>
+
+</div>
+
+<div class="field">
+
+<label>HOME ENERGY USE?</label>
+
+<select id="ob-energy">
+
+<option value="0.5">☀️ Solar / minimal use</option>
+
+<option value="1.2" selected>🏠 Average Indian household</option>
+
+<option value="2.5">❄️ Heavy AC use</option>
+
+<option value="4.0">⚡ Very high — large home</option>
+
+</select>
+
+</div>
+
+<div style="display:flex;gap:8px">
+
+<button class="btn btn-g" onclick="obNext(1)">← Back</button>
+
+<button class="btn btn-p" style="flex:1" onclick="obNext(3)">Next →</button>
+
+</div>
+
+</div>
+
+<!-- Step 3 -->
+
+<div class="ob-step" id="ob3">
+
+<div class="card lit" style="margin-bottom:16px;text-align:center">
+
+<div class="clabel">YOUR ESTIMATED DAILY BASELINE</div>
+
+<div class="cval mt8" id="ob-baseline-val">—<span class="cunit">kg CO2</span></div>
+
+<div class="xs text-m mt8" id="ob-baseline-note">Based on your answers</div>
+
+</div>
+
+<div style="font-size:13px;color:var(--tx3);margin-bottom:16px;line-height:1.6">
+
+        This is your starting point. EcoSense will track your actual daily activities to show you the real number — and how to reduce it.
+
+</div>
+
+<button class="btn btn-p btn-blk" onclick="startApp()">🚀 Start Tracking</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ---------- CUSTOM CONFIRM MODAL ---------- -->
+
+<div class="confirm-overlay" id="confirmOverlay">
+
+<div class="confirm-card">
+
+<div class="confirm-title" id="confirmTitle"></div>
+
+<div class="confirm-body" id="confirmBody"></div>
+
+<div class="confirm-actions">
+
+<button class="confirm-cancel" onclick="closeConfirmModal()">Cancel</button>
+
+<button class="confirm-ok" id="confirmOkBtn" onclick="runConfirmAction()">Confirm</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ---------- APP SHELL ---------- -->
+
+<div class="shell" id="shell" style="display:none">
+
+<div class="topbar">
+
+<div class="brand">
+
+<div class="brand-logo">🌿</div>
+
+<div class="brand-name">Eco<span>Sense</span></div>
+
+</div>
+
+<div class="topbar-right">
+
+<div class="streak-pill">🔥 <span id="streakNum">0</span> day streak</div>
+
+<div class="today-score-badge" id="topScore">Score: —</div>
+
+<div id="guestLoginBtn" style="display:none">
+
+<div class="guest-login-btn" onclick="showGuestLoginModal()">👤 Login / Sign Up</div>
+
+</div>
+
+<div id="topbarAvatar" style="display:none;cursor:pointer" onclick="goTab('prof')" title="Profile"></div>
+
+</div>
+
+</div>
+
+<div class="tabs">
+
+<div class="tab on" onclick="goTab('dash')" id="t-dash"><span class="tab-icon">📊</span> Dashboard</div>
+
+<div class="tab" onclick="goTab('log')" id="t-log"><span class="tab-icon">📝</span> Log Activity</div>
+
+<div class="tab" onclick="goTab('ai')" id="t-ai"><span class="tab-icon">🤖</span> AI Insights</div>
+
+<div class="tab" onclick="goTab('tools')" id="t-tools"><span class="tab-icon">🛠️</span> Tools</div>
+
+<div class="tab" onclick="goTab('goals')" id="t-goals"><span class="tab-icon">🎯</span> Goals</div>
+
+<div class="tab" onclick="goTab('ch')" id="t-ch"><span class="tab-icon">🏆</span> Challenges</div>
+
+<div class="tab" onclick="goTab('cmp')" id="t-cmp"><span class="tab-icon">🌐</span> Compare</div>
+
+<div class="tab" onclick="goTab('hist')" id="t-hist"><span class="tab-icon">📅</span> History</div>
+
+<div class="tab" onclick="goTab('prof')" id="t-prof"><span class="tab-icon">👤</span> Profile</div>
+
+</div>
+
+<!-- -- DASHBOARD -- -->
+
+<div class="page on" id="p-dash">
+
+<div class="flex aic jb mb16">
+
+<div><div class="pg-title" id="dashGreet">Hello!</div><div class="pg-sub" id="dashSub">Track your carbon footprint today</div></div>
+
+<button class="btn btn-p btn-sm" onclick="goTab('log')">+ Log Today</button>
+
+</div>
+
+<div class="g4 mb16">
+
+<div class="card lit">
+
+<div class="clabel">Today's CO2</div>
+
+<div class="cval" id="dToday">—<span class="cunit">kg</span></div>
+
+<div class="cdelta" id="dTodayD">No log yet today</div>
+
+</div>
+
+<div class="card">
+
+<div class="clabel">Weekly Avg</div>
+
+<div class="cval" id="dWeekAvg">—<span class="cunit">kg/day</span></div>
+
+<div class="cdelta flat" id="dWeekNote">last 7 days</div>
+
+</div>
+
+<div class="card">
+
+<div class="clabel">Carbon Score</div>
+
+<div class="cval" id="dScore">—<span class="cunit">/100</span></div>
+
+<div class="cdelta" id="dGrade">—</div>
+
+</div>
+
+<div class="card">
+
+<div class="clabel">Trees to Offset</div>
+
+<div class="cval" id="dTrees">—<span class="cunit">🌳</span></div>
+
+<div class="cdelta flat">weekly</div>
+
+</div>
+
+</div>
+
+<div class="g2 mb16">
+
+<!-- Score ring + breakdown -->
+
+<div class="card lit">
+
+<div class="clabel">CARBON SCORE</div>
+
+<div class="ring-wrap">
+
+<svg class="ring-svg" width="170" height="170" viewBox="0 0 170 170">
+
+<circle cx="85" cy="85" r="65" fill="none" stroke="var(--s3)" stroke-width="13"/>
+
+<circle cx="85" cy="85" r="65" fill="none" id="ringArc"
+
+              stroke="url(#rg)" stroke-width="13" stroke-linecap="round"
+
+              stroke-dasharray="408" stroke-dashoffset="408"
+
+              transform="rotate(-90 85 85)"
+
+              style="transition:stroke-dashoffset 1.2s cubic-bezier(.16,1,.3,1)"/>
+
+<defs>
+
+<linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="100%">
+
+<stop offset="0%" style="stop-color:#1db954"/><stop offset="100%" style="stop-color:#14b8a6"/>
+
+</linearGradient>
+
+</defs>
+
+<text x="85" y="79" text-anchor="middle" fill="#e8f5eb" font-size="34" font-family="Space Grotesk" font-weight="700" id="ringNum">—</text>
+
+<text x="85" y="100" text-anchor="middle" fill="#6b8f72" font-size="11" font-family="Space Mono" id="ringGrade">LOG ACTIVITY</text>
+
+</svg>
+
+</div>
+
+<div class="xs text-m" style="text-align:center;max-width:150px;margin:0 auto;line-height:1.5" id="ringMsg">Log your first activity to get your carbon score</div>
+
+</div>
+
+<!-- Category bars + trend -->
+
+<div class="card">
+
+<div class="clabel">TODAY BY CATEGORY (kg CO2)</div>
+
+<div class="barchart mt12">
+
+<div class="barrow"><div class="barlbl">Transport</div><div class="bartrack"><div class="barfill" id="bf-t" style="width:0%;background:var(--g2)"></div></div><div class="barval" id="bv-t">0 kg</div></div>
+
+<div class="barrow"><div class="barlbl">Food</div><div class="bartrack"><div class="barfill" id="bf-f" style="width:0%;background:var(--t2)"></div></div><div class="barval" id="bv-f">0 kg</div></div>
+
+<div class="barrow"><div class="barlbl">Energy</div><div class="bartrack"><div class="barfill" id="bf-e" style="width:0%;background:var(--a2)"></div></div><div class="barval" id="bv-e">0 kg</div></div>
+
+<div class="barrow"><div class="barlbl">Shopping</div><div class="bartrack"><div class="barfill" id="bf-s" style="width:0%;background:var(--p2)"></div></div><div class="barval" id="bv-s">0 kg</div></div>
+
+</div>
+
+<hr class="div"/>
+
+<div class="clabel">7-DAY TREND</div>
+
+<div class="trend-wrap"><canvas id="trendC"></canvas></div>
+
+</div>
+
+</div>
+
+<!-- Earth meter -->
+
+<div class="card mb16" style="text-align:center">
+
+<div class="clabel">PLANETARY HEALTH METER — fraction of daily "fair share" used</div>
+
+<div style="font-size:28px;margin:8px 0" id="earthEmoji">🌍</div>
+
+<div class="edots" id="earthDots"></div>
+
+<div class="xs text-m mt8" id="earthTxt">Log activities to see your planetary impact</div>
+
+</div>
+
+<!-- Impact stories -->
+
+<div class="g2 mb16" id="impactStories"></div>
+
+<!-- API Key Manager -->
+
+<div class="card apikey-card mb16">
+
+<div class="flex aic jb mb12">
+
+<div>
+
+<div class="clabel">🔑 AI API KEYS</div>
+
+<div class="xs text-m mt4">Paste your key — we auto-detect which AI it belongs to and validate it instantly</div>
+
+</div>
+
+<div class="apikey-status-row" id="apikeyStatusRow"></div>
+
+</div>
+
+<!-- Active keys display -->
+
+<div id="apikeyActiveList" style="display:none;margin-bottom:14px"></div>
+
+<!-- Input row -->
+
+<div class="apikey-input-wrap">
+
+<div class="apikey-input-icon" id="apikeyInputIcon">🔑</div>
+
+<input
+
+          type="password"
+
+          id="apikeyInput"
+
+          class="apikey-input"
+
+          placeholder="Paste API key here (Claude sk-ant-… or Gemini AIza…/AQ.…)"
+
+          oninput="detectKeyType(this.value)"
+
+          onpaste="setTimeout(()=>detectKeyType(document.getElementById('apikeyInput').value),50)"
+
+        />
+
+<div class="apikey-type-badge" id="apikeyTypeBadge" style="display:none"></div>
+
+<button class="btn btn-p btn-sm apikey-save-btn" onclick="saveApiKey()" id="apikeySaveBtn" disabled>Validate & Save</button>
+
+</div>
+
+<div class="apikey-hint" id="apikeyHint">We never send your keys anywhere except the official AI provider endpoints.</div>
+
+</div>
+
+<!-- Quick AI Tip -->
+
+<div class="card" style="border-color:rgba(29,185,84,.15)">
+
+<div class="flex aic jb mb12">
+
+<div class="clabel">💡 AI TIP OF THE DAY</div>
+
+<button class="btn btn-g btn-sm" onclick="quickTip()">Refresh</button>
+
+</div>
+
+<div class="ai-box" id="tipBox"><div class="ai-badge">Claude AI</div><br>Click Refresh or log activities for a personalised eco tip…</div>
+
+</div>
+
+</div>
+
+<!-- -- LOG ACTIVITY -- -->
+
+<div class="page" id="p-log">
+
+<div class="pg-title">Log Today's Activity</div>
+
+<div class="pg-sub">Enter what you actually did — we calculate the real CO2 impact</div>
+
+<!-- Live CO2 preview -->
+
+<div class="co2-preview mb16">
+
+<div>
+
+<div class="xs text-m">Running Total</div>
+
+<div class="co2-preview-num" id="logRunning">0.00 kg CO2</div>
+
+</div>
+
+<div class="co2-preview-bar"><div class="co2-preview-fill" id="logRunningBar" style="width:0%"></div></div>
+
+<button class="btn btn-p btn-sm" onclick="submitLog()" id="logSubmitBtn">Save Log ?</button>
+
+</div>
+
+<!-- TRANSPORT -->
+
+<div class="act-section">
+
+<div class="act-section-header">
+
+<div class="act-section-icon icon-transport">🚗</div>
+
+<div class="act-section-title">Transport</div>
+
+<div class="act-section-total mono xs text-g" id="cat-t">0.00 kg CO2</div>
+
+</div>
+
+<div class="act-item" id="ai-car">
+
+<div class="act-item-top" onclick="togAct('ai-car')">
+
+<span class="act-item-emoji">🚗</span>
+
+<span class="act-item-name">Car (petrol / diesel)</span>
+
+<span class="act-item-co2 med" id="co2-car">— kg</span>
+
+<div class="act-item-toggle" id="tog-car"></div>
+
+</div>
+
+<div class="act-inputs">
+
+<div class="field"><label>DISTANCE TRAVELLED (km)</label>
+
+<div class="input-group">
+
+<input type="number" id="in-car-km" placeholder="0" min="0" max="2000" oninput="calcAct('car')"/>
+
+<div class="unit-label">km</div>
+
+</div>
+
+<div class="hint">Average petrol car emits ~0.21 kg CO2 per km</div>
+
+</div>
+
+<div class="field"><label>FUEL TYPE</label>
+
+<select id="in-car-fuel" onchange="calcAct('car')">
+
+<option value="0.21">Petrol</option>
+
+<option value="0.17">Diesel</option>
+
+<option value="0.07">CNG / Hybrid</option>
+
+<option value="0.04">Electric (India grid)</option>
+
+</select>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="act-item" id="ai-bike">
+
+<div class="act-item-top" onclick="togAct('ai-bike')">
+
+<span class="act-item-emoji">🛵</span>
+
+<span class="act-item-name">Scooter / Motorbike</span>
+
+<span class="act-item-co2" id="co2-bike">— kg</span>
+
+<div class="act-item-toggle" id="tog-bike"></div>
+
+</div>
+
+<div class="act-inputs">
+
+<div class="field"><label>DISTANCE (km)</label>
+
+<div class="input-group">
+
+<input type="number" id="in-bike-km" placeholder="0" min="0" oninput="calcAct('bike')"/>
+
+<div class="unit-label">km</div>
+
+</div>
+
+<div class="hint">~0.11 kg CO2/km (100cc scooter)</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="act-item" id="ai-bus">
+
+<div class="act-item-top" onclick="togAct('ai-bus')">
+
+<span class="act-item-emoji">🚌</span>
+
+<span class="act-item-name">Bus</span>
+
+<span class="act-item-co2" id="co2-bus">— kg</span>
+
+<div class="act-item-toggle" id="tog-bus"></div>
+
+</div>
+
+<div class="act-inputs">
+
+<div class="field"><label>DISTANCE (km)</label>
+
+<div class="input-group">
+
+<input type="number" id="in-bus-km" placeholder="0" min="0" oninput="calcAct('bus')"/>
+
+<div class="unit-label">km</div>
+
+</div>
+
+<div class="hint">~0.089 kg CO2/km per passenger</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="act-item" id="ai-train">
+
+<div class="act-item-top" onclick="togAct('ai-train')">
+
+<span class="act-item-emoji">🚂</span>
+
+<span class="act-item-name">Train / Metro</span>
+
+<span class="act-item-co2" id="co2-train">— kg</span>
+
+<div class="act-item-toggle" id="tog-train"></div>
+
+</div>
+
+<div class="act-inputs">
+
+<div class="field"><label>DISTANCE (km)</label>
+
+<div class="input-group">
+
+<input type="number" id="in-train-km" placeholder="0" min="0" oninput="calcAct('train')"/>
+
+<div class="unit-label">km</div>
+
+</div>
+
+<div class="hint">~0.041 kg CO2/km (Indian Railways avg)</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="act-item" id="ai-flight">
+
+<div class="act-item-top" onclick="togAct('ai-flight')">
+
+<span class="act-item-emoji">✈️</span>
+
+<span class="act-item-name">Flight</span>
+
+<span class="act-item-co2 bad" id="co2-flight">— kg</span>
+
+<div class="act-item-toggle" id="tog-flight"></div>
+
+</div>
+
+<div class="act-inputs">
+
+<div class="field"><label>ONE-WAY DISTANCE (km)</label>
+
+<div class="input-group">
+
+<input type="number" id="in-flight-km" placeholder="e.g. 1400 for Delhi?Mumbai" min="0" oninput="calcAct('flight')"/>
+
+<div class="unit-label">km</div>
+
+</div>
+
+</div>
+
+<div class="field"><label>TRIP TYPE</label>
+
+<select id="in-flight-type" onchange="calcAct('flight')">
+
+<option value="1">One way</option><option value="2">Return (×2)</option>
+
+</select>
+
+</div>
+
+<div class="hint mt4">~0.255 kg CO2/km including radiative forcing</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- FOOD -->
+
+<div class="act-section">
+
+<div class="act-section-header">
+
+<div class="act-section-icon icon-food">🍽️</div>
+
+<div class="act-section-title">Food & Diet</div>
+
+<div class="act-section-total mono xs text-g" id="cat-f">0.00 kg CO2</div>
+
+</div>
+
+<div class="act-item" id="ai-meals">
+
+<div class="act-item-top" onclick="togAct('ai-meals')">
+
+<span class="act-item-emoji">🍽️</span>
+
+<span class="act-item-name">Meals today</span>
+
+<span class="act-item-co2" id="co2-meals">— kg</span>
+
+<div class="act-item-toggle" id="tog-meals"></div>
+
+</div>
+
+<div class="act-inputs">
+
+<div class="field"><label>BREAKFAST TYPE</label>
+
+<select id="in-meals-b" onchange="calcAct('meals')">
+
+<option value="0">Skipped</option>
+
+<option value="0.2" selected>🌱 Vegetarian / vegan</option>
+
+<option value="0.5">🥚 Eggs / dairy included</option>
+
+<option value="1.2">🥩 Meat included</option>
+
+</select>
+
+</div>
+
+<div class="field"><label>LUNCH TYPE</label>
+
+<select id="in-meals-l" onchange="calcAct('meals')">
+
+<option value="0">Skipped</option>
+
+<option value="0.3" selected>🌱 Vegetarian / vegan</option>
+
+<option value="0.8">🥚 Eggs / dairy included</option>
+
+<option value="2.5">🥩 Meat included</option>
+
+<option value="1.8">🍗 Chicken / fish</option>
+
+</select>
+
+</div>
+
+<div class="field"><label>DINNER TYPE</label>
+
+<select id="in-meals-d" onchange="calcAct('meals')">
+
+<option value="0">Skipped</option>
+
+<option value="0.3" selected>🌱 Vegetarian / vegan</option>
+
+<option value="0.8">🥚 Eggs / dairy included</option>
+
+<option value="2.5">🥩 Meat included (beef/lamb)</option>
+
+<option value="1.8">🍗 Chicken / fish</option>
+
+</select>
+
+</div>
+
+<div class="field"><label>FOOD WASTED APPROX</label>
+
+<select id="in-meals-waste" onchange="calcAct('meals')">
+
+<option value="0">None — I ate everything</option>
+
+<option value="0.3">A little (small scraps)</option>
+
+<option value="0.8">Some (half a meal)</option>
+
+<option value="1.5">A lot (whole meal wasted)</option>
+
+</select>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="act-item" id="ai-dairy">
+
+<div class="act-item-top" onclick="togAct('ai-dairy')">
+
+<span class="act-item-emoji">🥛</span>
+
+<span class="act-item-name">Dairy / Tea / Coffee</span>
+
+<span class="act-item-co2" id="co2-dairy">— kg</span>
+
+<div class="act-item-toggle" id="tog-dairy"></div>
+
+</div>
+
+<div class="act-inputs">
+
+<div class="field"><label>GLASSES OF MILK / CHAI / COFFEE</label>
+
+<div class="input-group">
+
+<input type="number" id="in-dairy-n" placeholder="0" min="0" max="20" oninput="calcAct('dairy')"/>
+
+<div class="unit-label">glasses</div>
+
+</div>
+
+<div class="hint">~0.35 kg CO2 per glass (with cow milk)</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ENERGY -->
+
+<div class="act-section">
+
+<div class="act-section-header">
+
+<div class="act-section-icon icon-energy">?</div>
+
+<div class="act-section-title">Home Energy</div>
+
+<div class="act-section-total mono xs text-g" id="cat-e">0.00 kg CO2</div>
+
+</div>
+
+<div class="act-item" id="ai-ac">
+
+<div class="act-item-top" onclick="togAct('ai-ac')">
+
+<span class="act-item-emoji">❄️</span>
+
+<span class="act-item-name">Air Conditioner</span>
+
+<span class="act-item-co2 med" id="co2-ac">— kg</span>
+
+<div class="act-item-toggle" id="tog-ac"></div>
+
+</div>
+
+<div class="act-inputs">
+
+<div class="field">
+
+<label>HOURS USED: <span class="slider-val" id="sv-ac">0</span> hrs</label>
+
+<input type="range" id="in-ac-h" min="0" max="24" step="0.5" value="0" oninput="document.getElementById('sv-ac').textContent=this.value;calcAct('ac')"/>
+
+</div>
+
+<div class="field"><label>AC CAPACITY</label>
+
+<select id="in-ac-ton" onchange="calcAct('ac')">
+
+<option value="0.85">1 Ton (approx 1kW)</option>
+
+<option value="1.28" selected>1.5 Ton (approx 1.5kW)</option>
+
+<option value="1.70">2 Ton (approx 2kW)</option>
+
+</select>
+
+</div>
+
+<div class="hint">India grid emits ~0.85 kg CO2 per kWh (CEA 2023)</div>
+
+</div>
+
+</div>
+
+<div class="act-item" id="ai-geyser">
+
+<div class="act-item-top" onclick="togAct('ai-geyser')">
+
+<span class="act-item-emoji">🚿</span>
+
+<span class="act-item-name">Hot Shower / Geyser</span>
+
+<span class="act-item-co2" id="co2-geyser">— kg</span>
+
+<div class="act-item-toggle" id="tog-geyser"></div>
+
+</div>
+
+<div class="act-inputs">
+
+<div class="field">
+
+<label>SHOWER DURATION: <span class="slider-val" id="sv-geyser">0</span> min</label>
+
+<input type="range" id="in-geyser-m" min="0" max="30" step="1" value="0" oninput="document.getElementById('sv-geyser').textContent=this.value;calcAct('geyser')"/>
+
+</div>
+
+<div class="hint">Electric geyser (2kW) × ~0.85 kg CO2/kWh</div>
+
+</div>
+
+</div>
+
+<div class="act-item" id="ai-elec">
+
+<div class="act-item-top" onclick="togAct('ai-elec')">
+
+<span class="act-item-emoji">⚡</span>
+
+<span class="act-item-name">General Electricity Use</span>
+
+<span class="act-item-co2" id="co2-elec">— kg</span>
+
+<div class="act-item-toggle" id="tog-elec"></div>
+
+</div>
+
+<div class="act-inputs">
+
+<div class="field"><label>ELECTRICITY CONSUMED (units / kWh)</label>
+
+<div class="input-group">
+
+<input type="number" id="in-elec-kwh" placeholder="0" min="0" step="0.5" oninput="calcAct('elec')"/>
+
+<div class="unit-label">kWh</div>
+
+</div>
+
+<div class="hint">Check your meter or estimate: avg Indian home uses 3–5 kWh/day</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="act-item" id="ai-lpg">
+
+<div class="act-item-top" onclick="togAct('ai-lpg')">
+
+<span class="act-item-emoji">🍳</span>
+
+<span class="act-item-name">LPG / Cooking Gas</span>
+
+<span class="act-item-co2" id="co2-lpg">— kg</span>
+
+<div class="act-item-toggle" id="tog-lpg"></div>
+
+</div>
+
+<div class="act-inputs">
+
+<div class="field">
+
+<label>HOURS OF COOKING: <span class="slider-val" id="sv-lpg">0</span> hrs</label>
+
+<input type="range" id="in-lpg-h" min="0" max="8" step="0.25" value="0" oninput="document.getElementById('sv-lpg').textContent=this.value;calcAct('lpg')"/>
+
+</div>
+
+<div class="hint">LPG stove ~0.22 kg CO2/hour</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- SHOPPING -->
+
+<div class="act-section">
+
+<div class="act-section-header">
+
+<div class="act-section-icon icon-shopping">🛍️</div>
+
+<div class="act-section-title">Shopping & Consumption</div>
+
+<div class="act-section-total mono xs text-g" id="cat-s">0.00 kg CO2</div>
+
+</div>
+
+<div class="act-item" id="ai-clothes">
+
+<div class="act-item-top" onclick="togAct('ai-clothes')">
+
+<span class="act-item-emoji">👕</span>
+
+<span class="act-item-name">Clothing Purchase</span>
+
+<span class="act-item-co2 med" id="co2-clothes">— kg</span>
+
+<div class="act-item-toggle" id="tog-clothes"></div>
+
+</div>
+
+<div class="act-inputs">
+
+<div class="field"><label>ITEMS PURCHASED</label>
+
+<select id="in-clothes-type" onchange="calcAct('clothes')">
+
+<option value="2.5">👕 T-shirt / basic top</option>
+
+<option value="8.0">👔 Formal shirt</option>
+
+<option value="32.0">👖 Jeans / trousers</option>
+
+<option value="15.0">🧥 Jacket / sweater</option>
+
+<option value="70.0">👟 Shoes / footwear</option>
+
+</select>
+
+</div>
+
+<div class="field"><label>QUANTITY</label>
+
+<div class="input-group">
+
+<input type="number" id="in-clothes-qty" placeholder="1" min="1" max="20" value="1" oninput="calcAct('clothes')"/>
+
+<div class="unit-label">items</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="act-item" id="ai-online">
+
+<div class="act-item-top" onclick="togAct('ai-online')">
+
+<span class="act-item-emoji">📦</span>
+
+<span class="act-item-name">Online Deliveries</span>
+
+<span class="act-item-co2" id="co2-online">— kg</span>
+
+<div class="act-item-toggle" id="tog-online"></div>
+
+</div>
+
+<div class="act-inputs">
+
+<div class="field"><label>PACKAGES DELIVERED TODAY</label>
+
+<div class="input-group">
+
+<input type="number" id="in-online-n" placeholder="0" min="0" oninput="calcAct('online')"/>
+
+<div class="unit-label">packages</div>
+
+</div>
+
+<div class="hint">~0.5 kg CO2 per delivery (last-mile)</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="act-item" id="ai-plastic">
+
+<div class="act-item-top" onclick="togAct('ai-plastic')">
+
+<span class="act-item-emoji">♻️</span>
+
+<span class="act-item-name">Single-use Plastic</span>
+
+<span class="act-item-co2" id="co2-plastic">— kg</span>
+
+<div class="act-item-toggle" id="tog-plastic"></div>
+
+</div>
+
+<div class="act-inputs">
+
+<div class="field"><label>PLASTIC BAGS / BOTTLES USED</label>
+
+<div class="input-group">
+
+<input type="number" id="in-plastic-n" placeholder="0" min="0" oninput="calcAct('plastic')"/>
+
+<div class="unit-label">items</div>
+
+</div>
+
+<div class="hint">~0.05 kg CO2 per single-use bag/bottle</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div style="display:flex;gap:10px;margin-top:8px">
+
+<button class="btn btn-g" onclick="clearLog()">Clear All</button>
+
+<button class="btn btn-p" style="flex:1" onclick="submitLog()">💾 Save Today's Log</button>
+
+</div>
+
+</div>
+
+<!-- -- AI INSIGHTS -- -->
+
+<div class="page" id="p-ai">
+
+<div class="pg-title">AI Insights</div>
+
+<div class="pg-sub">Powered by Claude — deep analysis of your carbon data</div>
+
+<div class="g2 mb16">
+
+<button class="btn btn-s btn-blk" onclick="runInsight('daily')">📊 Analyse Today</button>
+
+<button class="btn btn-s btn-blk" onclick="runInsight('weekly')">📈 Analyse This Week</button>
+
+<button class="btn btn-s btn-blk" onclick="runInsight('plan')">🗺️ Build My Reduction Plan</button>
+
+<button class="btn btn-s btn-blk" onclick="runInsight('forecast')">🔮 Forecast My Month</button>
+
+</div>
+
+<div class="card mb16">
+
+<div class="flex aic jb mb12">
+
+<div class="clabel">AI ANALYSIS</div>
+
+<div class="xs text-m" id="insightStatus"></div>
+
+</div>
+
+<div class="ai-box" id="insightOut">
+
+<div class="ai-badge">Claude AI</div><br>
+
+        Choose an analysis above to get personalised insights based on your logged data…
+
+</div>
+
+</div>
+
+<!-- Generate Report -->
+
+<div class="card mb16" style="border-color:rgba(29,185,84,.15)">
+
+<div class="clabel">📄 GENERATE WEEKLY REPORT</div>
+
+<div class="xs text-m mt8 mb12">Get a formatted report you can use for your blog post submission</div>
+
+<button class="btn btn-p btn-sm" onclick="genReport()">Generate Report</button>
+
+<div id="reportOut" class="report-box mt12" style="display:none"></div>
+
+<button id="copyReportBtn" class="btn btn-g btn-sm mt8" style="display:none" onclick="copyReport()">📋 Copy Report</button>
+
+</div>
+
+<!-- AI Chat -->
+
+<div class="card">
+
+<div class="clabel">💬 CHAT WITH ECOSENSE AI</div>
+
+<div class="chat-wrap mt12" id="chatMsgs">
+
+<div class="cmsg ai">🌍 Hi! I'm your EcoSense AI. Ask me anything — how to reduce your footprint, what your numbers mean, or what actions have the most impact.</div>
+
+</div>
+
+<div class="chat-row">
+
+<div class="field" style="flex:1;margin:0">
+
+<input type="text" id="chatIn" placeholder="e.g. How do I reduce my food emissions?" onkeydown="if(event.key==='Enter')sendChat()"/>
+
+</div>
+
+<button class="btn btn-p btn-sm" onclick="sendChat()" style="flex-shrink:0;height:40px">Send</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- -- CHALLENGES -- -->
+
+<div class="page" id="p-ch">
+
+<div class="flex aic jb mb16">
+
+<div><div class="pg-title">Eco Challenges</div><div class="pg-sub">Complete challenges to reduce your footprint & earn points</div></div>
+
+<div style="text-align:right"><div class="xs text-m">Total Points</div><div class="mono fw7 text-a" style="font-size:22px" id="totalPts">0</div></div>
+
+</div>
+
+<div class="card mb16">
+
+<div class="clabel">WEEKLY LOGGING STREAK</div>
+
+<div class="wdots mt12" id="wdots"></div>
+
+</div>
+
+<div id="chList" style="display:flex;flex-direction:column;gap:9px"></div>
+
+<div class="card mt20">
+
+<div class="clabel">🏆 THIS WEEK'S LEADERBOARD</div>
+
+<div id="lbList" class="mt12"></div>
+
+</div>
+
+</div>
+
+<!-- -- COMPARE -- -->
+
+<div class="page" id="p-cmp">
+
+<div class="pg-title">Global Comparison</div>
+
+<div class="pg-sub">How your footprint compares to national and global averages</div>
+
+<div class="card mb16">
+
+<div class="clabel">DAILY CO2 — kg per person per day</div>
+
+<div id="cmpChart" class="mt12"></div>
+
+</div>
+
+<div class="g2 mb16">
+
+<div class="card">
+
+<div class="clabel">YOUR ANNUAL ESTIMATE</div>
+
+<div class="cval mt8" id="annualEst">—<span class="cunit">t CO2</span></div>
+
+<div class="xs text-m mt8">Based on your 7-day average</div>
+
+<hr class="div"/>
+
+<div class="clabel">TO HIT 1.5°C TARGET (1.5t/yr)</div>
+
+<div class="cval text-a mt8" id="reductionNeed">—<span class="cunit">t to cut</span></div>
+
+</div>
+
+<div class="card">
+
+<div class="clabel">YOUR CO2 EQUALS…</div>
+
+<div id="equivList" class="mt8" style="display:flex;flex-direction:column;gap:10px"></div>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="clabel">DAILY IMPACT VISUALISED</div>
+
+<div class="xs text-m mt4 mb8">Each 🌿 = 0.1 kg CO2</div>
+
+<div id="impactViz" style="display:flex;flex-wrap:wrap;gap:3px;line-height:1.4"></div>
+
+</div>
+
+</div>
+
+<!-- -- HISTORY -- -->
+
+<div class="page" id="p-hist">
+
+<div class="flex aic jb mb16">
+
+<div><div class="pg-title">Activity History</div><div class="pg-sub">All your logged days</div></div>
+
+<button class="btn btn-danger btn-sm" onclick="clearHistory()">🗑️ Clear All</button>
+
+</div>
+
+<div id="histEmpty" class="card" style="text-align:center;padding:36px">
+
+<div style="font-size:36px;margin-bottom:10px">📅</div>
+
+<div class="sm text-m">No history yet — log your first activity!</div>
+
+<button class="btn btn-p btn-sm mt12" onclick="goTab('log')">Log Activity</button>
+
+</div>
+
+<div id="histContent" style="display:none;overflow-x:auto">
+
+<table class="htable">
+
+<thead><tr><th>Date</th><th>Total CO2</th><th>Score</th><th>Top Category</th><th>Activities</th></tr></thead>
+
+<tbody id="histBody"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<!-- -- PROFILE -- -->
+
+<div class="page" id="p-prof">
+
+<div class="pg-title">Your Profile</div>
+
+<div class="pg-sub">Stats, achievements, and settings</div>
+
+<div class="card mb16">
+
+<div class="flex gap12 aic">
+
+<div style="width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,var(--g1),var(--t1));display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:var(--glow2)">👤</div>
+
+<div>
+
+<div style="font-size:20px;font-weight:700" id="profName">—</div>
+
+<div class="sm text-m" id="profCountry">—</div>
+
+<div class="xs text-m mt4" id="profBaseline">—</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="g4 mb16">
+
+<div class="spill"><div class="sv text-g" id="ps-days">0</div><div class="sl">Days Logged</div></div>
+
+<div class="spill"><div class="sv" id="ps-total">0</div><div class="sl">Total kg CO2</div></div>
+
+<div class="spill"><div class="sv text-a" id="ps-streak">0</div><div class="sl">Best Streak</div></div>
+
+<div class="spill"><div class="sv text-g" id="ps-pts">0</div><div class="sl">Eco Points</div></div>
+
+</div>
+
+<div class="card mb16">
+
+<div class="clabel">ACHIEVEMENTS</div>
+
+<div id="achList" class="mt12" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+
+</div>
+
+<div class="card mb16">
+
+<div class="clabel">SETTINGS</div>
+
+<div class="field mt12"><label>YOUR NAME</label><input type="text" id="setName" placeholder="Name"/></div>
+
+<div class="field"><label>COUNTRY</label>
+
+<select id="setCountry">
+
+<option value="india">🇮🇳 India</option>
+
+<option value="global">🌍 Global</option>
+
+<option value="usa">🇺🇸 USA</option>
+
+<option value="eu">🇪🇺 EU</option>
+
+<option value="china">🇨🇳 China</option>
+
+<option value="uk">🇬🇧 UK</option>
+
+</select>
+
+</div>
+
+<button class="btn btn-p btn-sm" onclick="saveSettings()">Save</button>
+
+</div>
+
+<div class="card mb16" style="border-color:rgba(245,158,11,.15)">
+
+<div class="clabel" style="color:var(--a2)">SESSION</div>
+
+<div class="sm text-m mt8 mb12" id="sessionInfo">Session info loading…</div>
+
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+
+<button class="btn btn-s btn-sm" onclick="extendSession()">⏱️ Extend Session (+30m)</button>
+
+<button class="btn btn-g btn-sm" onclick="signOut()">🚪 Sign Out</button>
+
+</div>
+
+</div>
+
+<div class="card" style="border-color:rgba(239,68,68,.2)">
+
+<div class="clabel" style="color:var(--r2)">DANGER ZONE</div>
+
+<div class="sm text-m mt8 mb12">Permanently delete all data and start fresh.</div>
+
+<button class="btn btn-danger btn-sm" onclick="resetAll()">Reset All Data</button>
+
+</div>
+
+</div>
+
+<!-- -- TOOLS PAGE -- -->
+
+<div class="page" id="p-tools">
+
+<div class="pg-title">EcoSense Tools</div>
+
+<div class="pg-sub">Photo scanner • Voice logging • Share card • AI Debate • Offsets • PDF export</div>
+
+<!-- Dark/Light + Offline badges row -->
+
+<div class="flex aic gap8 mb16" style="flex-wrap:wrap">
+
+<button class="btn btn-s btn-sm" onclick="toggleDark()" id="themeBtn">☀️ Light Mode</button>
+
+<div class="xs text-m" id="offlineIndicator" style="display:flex;align-items:center;gap:5px">
+
+<span id="offlineDot" style="width:7px;height:7px;border-radius:50%;background:var(--g2)"></span>
+
+<span id="offlineLabel">Online</span>
+
+</div>
+
+</div>
+
+<div class="g2 mb16">
+
+<!-- 📷 Photo / Receipt Scanner -->
+
+<div class="card">
+
+<div class="clabel">📷 PHOTO / RECEIPT SCANNER</div>
+
+<div class="xs text-m mt4 mb12">Snap your electricity bill, grocery receipt, or fuel receipt — AI reads it and auto-fills your log</div>
+
+<div class="scan-drop" id="scanDrop">
+
+<input type="file" id="scanFileInput" accept="image/*,application/pdf" onchange="handleReceiptFile(event)"/>
+
+<div style="font-size:28px;margin-bottom:8px">📷</div>
+
+<div class="sm fw7">Tap to upload photo or file</div>
+
+<div class="xs text-m mt4">JPG, PNG, PDF — electricity bill, grocery, fuel receipt</div>
+
+</div>
+
+<img id="scanPreview" class="scan-preview" alt="Preview"/>
+
+<div class="ai-box mt12" id="scanResult" style="display:none">
+
+<div class="ai-badge">Claude AI Vision</div><br>
+
+<div id="scanResultText">Analysing your receipt…</div>
+
+</div>
+
+<button class="btn btn-p btn-sm mt12" id="scanApplyBtn" style="display:none" onclick="applyScanToLog()">? Apply to Log</button>
+
+</div>
+
+<!-- 🎤 Voice Input -->
+
+<div class="card">
+
+<div class="clabel">🎤 VOICE LOGGING</div>
+
+<div class="xs text-m mt4 mb12">Say what you did today — AI will parse it and fill your activity log automatically</div>
+
+<div class="flex aic gap8 mb12">
+
+<button class="voice-btn" id="voiceBtn" onclick="toggleVoice()" title="Hold to speak">🎤</button>
+
+<div>
+
+<div class="sm fw7" id="voiceBtnLabel">Tap to start listening</div>
+
+<div class="xs text-m" id="voiceStatus">Speak naturally: "I took a bus for 15 km and had dal rice for lunch"</div>
+
+</div>
+
+</div>
+
+<div class="voice-transcript" id="voiceTranscript"></div>
+
+<div class="ai-box mt12" id="voiceResult" style="display:none">
+
+<div class="ai-badge">Claude AI</div><br>
+
+<div id="voiceResultText"></div>
+
+</div>
+
+<button class="btn btn-p btn-sm mt12" id="voiceApplyBtn" style="display:none" onclick="applyVoiceToLog()">? Apply to Log</button>
+
+</div>
+
+</div>
+
+<!-- 🤖 AI Debate Mode -->
+
+<div class="card mb16">
+
+<div class="clabel">🤖 AI DEBATE MODE</div>
+
+<div class="xs text-m mt4 mb12">Challenge a climate claim — EcoSense AI debates back with real data. Try: "Flying isn't that bad" or "EVs are worse than petrol"</div>
+
+<div class="field">
+
+<label>YOUR CLAIM</label>
+
+<input type="text" id="debateQ" placeholder='e.g. "I recycle so my carbon footprint is fine"' onkeydown="if(event.key==='Enter')runDebate()"/>
+
+</div>
+
+<button class="btn btn-s btn-sm" onclick="runDebate()">⚔️ Debate This</button>
+
+<div class="mt12" id="debateResult" style="display:none">
+
+<div class="debate-side user-side mb8">
+
+<div class="xs text-m mb4">YOUR CLAIM</div>
+
+<div id="debateUserClaim"></div>
+
+</div>
+
+<div class="debate-side ai-side">
+
+<div class="xs text-m mb4">ECOSENSE AI RESPONDS</div>
+
+<div id="debateAIReply"></div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- 🌳 Carbon Offsets -->
+
+<div class="card mb16">
+
+<div class="clabel">🌳 CARBON OFFSET PROJECTS — INDIA</div>
+
+<div class="xs text-m mt4 mb12" id="offsetCalcText">Your weekly footprint: calculating…</div>
+
+<a class="offset-link" href="https://sankalptaru.org" target="_blank">
+
+<div class="offset-link-icon">🌳</div>
+
+<div class="offset-link-body">
+
+<div class="offset-link-name">SankalpTaru Foundation</div>
+
+<div class="offset-link-desc">Plant native trees across India • Gold Standard certified</div>
+
+</div>
+
+<div class="offset-link-price">~?150/tree</div>
+
+</a>
+
+<a class="offset-link" href="https://www.goldstandard.org/our-work/solutions/carbon-credits" target="_blank">
+
+<div class="offset-link-icon">⭐</div>
+
+<div class="offset-link-body">
+
+<div class="offset-link-name">Gold Standard Carbon Credits</div>
+
+<div class="offset-link-desc">International certified offset marketplace</div>
+
+</div>
+
+<div class="offset-link-price">~$12/t CO2</div>
+
+</a>
+
+<a class="offset-link" href="https://www.climateimpact.com" target="_blank">
+
+<div class="offset-link-icon">☀️</div>
+
+<div class="offset-link-body">
+
+<div class="offset-link-name">Climate Impact Partners</div>
+
+<div class="offset-link-desc">Clean cookstoves • water purification in India</div>
+
+</div>
+
+<div class="offset-link-price">~$8/t CO2</div>
+
+</a>
+
+</div>
+
+<!-- 📤 Share Card + PDF Export -->
+
+<div class="g2">
+
+<div class="card">
+
+<div class="clabel">📤 SHAREABLE CARBON CARD</div>
+
+<div class="xs text-m mt4 mb12">Generate a card to share your eco-score on social media</div>
+
+<div class="share-card-preview" id="shareCardEl">
+
+<div style="position:relative;z-index:1">
+
+<div class="xs text-m mb8" style="color:var(--g3);font-family:var(--fm);letter-spacing:1px">MY CARBON FOOTPRINT TODAY</div>
+
+<div class="share-score-big" id="shareScoreBig">—</div>
+
+<div style="font-size:15px;color:var(--tx2);margin-top:4px">kg CO2 today</div>
+
+<div style="margin-top:12px;font-size:12px;color:var(--tx3)" id="shareGradeText">—</div>
+
+<div style="margin-top:14px;font-size:11px;color:var(--tx3);display:flex;gap:12px;font-family:var(--fm)" id="shareCatRow"></div>
+
+</div>
+
+<div class="share-watermark">EcoSense 🌿</div>
+
+</div>
+
+<canvas id="shareCanvas" style="display:none"></canvas>
+
+<div id="shareCardPreview" style="display:none;margin-top:12px"></div>
+
+<div style="display:flex;gap:8px;margin-top:12px">
+
+<button class="btn btn-p btn-sm" style="flex:1" onclick="genShareCard()">⬇️ Generate & Download</button>
+
+<button class="btn btn-g btn-sm" style="flex:1" onclick="copyShareText()">📋 Copy Share Text</button>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="clabel">📄 PDF REPORT</div>
+
+<div class="xs text-m mt4 mb12">Export your weekly/monthly data as a formatted PDF report for your Hack2Skill blog submission</div>
+
+<div class="pdf-export-wrap">
+
+<div class="field" style="margin-bottom:10px">
+
+<label>REPORT PERIOD</label>
+
+<select id="pdfPeriod">
+
+<option value="week">This Week (7 days)</option>
+
+<option value="month">This Month (30 days)</option>
+
+<option value="all">All Time</option>
+
+</select>
+
+</div>
+
+<button class="btn btn-p btn-sm btn-blk" onclick="exportPDF()">📄 Generate PDF</button>
+
+</div>
+
+<div class="xs text-m mt8" style="color:var(--tx3)">Opens a print-ready page you can save as PDF from your browser</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- -- GOALS PAGE -- -->
+
+<div class="page" id="p-goals">
+
+<div class="pg-title">Monthly Goals</div>
+
+<div class="pg-sub">Set a target and track your progress day by day</div>
+
+<!-- City Mode -->
+
+<div class="card mb16">
+
+<div class="clabel">🏙️ INDIA CITY MODE — LOCAL EMISSION FACTORS</div>
+
+<div class="xs text-m mt4 mb12">Your city's electricity grid and transport emissions differ. Select yours for more accurate tracking.</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px" id="cityChips"></div>
+
+<div class="xs text-m" id="cityFactorNote" style="color:var(--g2)"></div>
+
+</div>
+
+<!-- Goal Setting -->
+
+<div class="card mb16">
+
+<div class="clabel">🎯 SET YOUR MONTHLY GOAL</div>
+
+<div class="g2 mt12">
+
+<div class="field">
+
+<label>TARGET (kg CO2/day)</label>
+
+<input type="number" id="goalTarget" placeholder="e.g. 4.0" min="0.5" max="50" step="0.5"/>
+
+<div class="hint">India avg: 4.6 • 1.5°C target: 4.11 • Your baseline: <span id="goalBaselineHint">—</span></div>
+
+</div>
+
+<div class="field">
+
+<label>MOTIVATION</label>
+
+<input type="text" id="goalMotivation" placeholder="e.g. For my kids' future 🌍" maxlength="60"/>
+
+</div>
+
+</div>
+
+<button class="btn btn-p btn-sm" onclick="saveGoal()">Set Goal</button>
+
+</div>
+
+<!-- Goal Progress -->
+
+<div class="card mb16" id="goalProgressCard" style="display:none">
+
+<div class="clabel">THIS MONTH'S PROGRESS</div>
+
+<div class="flex gap12 aic mt12">
+
+<div class="goal-ring-wrap">
+
+<svg width="120" height="120" viewBox="0 0 120 120">
+
+<circle cx="60" cy="60" r="50" fill="none" stroke="var(--s3)" stroke-width="10"/>
+
+<circle cx="60" cy="60" r="50" fill="none" id="goalArc"
+
+              stroke="url(#gg)" stroke-width="10" stroke-linecap="round"
+
+              stroke-dasharray="314" stroke-dashoffset="314"
+
+              transform="rotate(-90 60 60)"
+
+              style="transition:stroke-dashoffset 1s cubic-bezier(.16,1,.3,1)"/>
+
+<defs><linearGradient id="gg" x1="0%" y1="0%" x2="100%" y2="0%">
+
+<stop offset="0%" style="stop-color:#1db954"/><stop offset="100%" style="stop-color:#14b8a6"/>
+
+</linearGradient></defs>
+
+</svg>
+
+<div class="goal-ring-label">
+
+<div style="font-size:22px;font-weight:700;color:var(--g2)" id="goalPct">—%</div>
+
+<div style="font-size:9px;color:var(--tx3);font-family:var(--fm)">ON TRACK</div>
+
+</div>
+
+</div>
+
+<div style="flex:1">
+
+<div class="sm fw7 mb8" id="goalMotivationDisp"></div>
+
+<div class="xs text-m mb4">Target: <span class="text-g mono" id="goalTargetDisp">—</span> kg/day</div>
+
+<div class="xs text-m mb4">Your avg this month: <span class="mono" id="goalActualDisp">—</span> kg/day</div>
+
+<div class="xs text-m mb4">Days on target: <span class="text-g mono" id="goalDaysGood">—</span></div>
+
+<div class="xs text-m" id="goalMsg" style="line-height:1.5;margin-top:6px"></div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- Weekly AI Coach -->
+
+<div class="card">
+
+<div class="clabel">🤖 WEEKLY AI COACH</div>
+
+<div class="xs text-m mt4 mb12">Get a personalised weekly coaching message based on your progress toward your goal</div>
+
+<button class="btn btn-p btn-sm" onclick="runWeeklyCoach()">Get Weekly Coaching Message</button>
+
+<div class="ai-box mt12" id="coachOut" style="display:none">
+
+<div class="ai-badge">Claude AI Coach</div><br>
+
+<div id="coachText"></div>
+
+</div>
+
+</div>
+
+</div>
+
+</div><!-- /shell -->
+
+<!-- Offline banner -->
+
+<div class="offline-banner" id="offlineBanner">📶 You're offline — EcoSense works locally, all your data is safe</div>
+
+<!-- Onboarding tutorial overlay -->
+
+<div class="tutorial-overlay" id="tutorialOverlay" style="display:none">
+
+<div class="tutorial-tip" id="tutorialTip">
+
+<div style="font-weight:700;margin-bottom:4px" id="tutTipTitle"></div>
+
+<div id="tutTipText"></div>
+
+<div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">
+
+<span class="mono" style="font-size:10px;opacity:.8" id="tutStepCount"></span>
+
+<span style="display:flex;gap:10px">
+
+<span class="tutorial-skip" onclick="skipTutorial()">Skip</span>
+
+<span class="tutorial-skip" style="opacity:1;font-weight:600" onclick="nextTutStep()">Next ?</span>
+
+</span>
+
+</div>
+
+</div>
+
+</div>
+
+<div id="toasts"></div>
+
+<script>
+
+'use strict';
+
+// -------------------------------------------
+
+// DATA
+
+// -------------------------------------------
+
+const COUNTRY = {
+
+  india:{daily:4.6,annual:1.9,lbl:'India Avg'},
+
+  usa:{daily:44.5,annual:16.2,lbl:'USA Avg'},
+
+  eu:{daily:19.2,annual:7.0,lbl:'EU Avg'},
+
+  china:{daily:24.7,annual:9.0,lbl:'China Avg'},
+
+  uk:{daily:14.2,annual:5.2,lbl:'UK Avg'},
+
+  global:{daily:13.5,annual:4.9,lbl:'Global Avg'}
+
+};
+
+const CHALLENGES = [
+
+  {id:'c1',name:'Zero Meat Day',desc:'Skip all meat for 24 hours',pts:50,saving:4.2,icon:'🥗'},
+
+  {id:'c2',name:'Walk or Cycle Only',desc:'No motorised transport today',pts:45,saving:3.0,icon:'🚴'},
+
+  {id:'c3',name:'Cold Shower',desc:'No geyser or hot water',pts:30,saving:0.9,icon:'🚿'},
+
+  {id:'c4',name:'No AC Today',desc:'Avoid air conditioning all day',pts:45,saving:3.2,icon:'🌡️'},
+
+  {id:'c5',name:'Zero Plastic',desc:'No single-use bags or bottles',pts:35,saving:0.5,icon:'♻️'},
+
+  {id:'c6',name:'Cook at Home',desc:'No restaurant or delivery food',pts:25,saving:2.0,icon:'🍳'},
+
+  {id:'c7',name:'Unplug Standby',desc:'Unplug all devices when not in use',pts:20,saving:0.3,icon:'🔌'},
+
+  {id:'c8',name:'Secondhand Only',desc:'Any purchase must be secondhand',pts:60,saving:8.0,icon:'🛍️'},
+
+  {id:'c9',name:'Public Transport Only',desc:'Only bus/train/metro today',pts:40,saving:5.5,icon:'🚌'},
+
+  {id:'c10',name:'Plant Something',desc:'Plant a seed or water a plant',pts:80,saving:0.0,icon:'🌱'}
+
+];
+
+const ACHIEVEMENTS = [
+
+  {id:'a1',icon:'👣',name:'First Step',desc:'Logged first day',req:d=>d.days>=1},
+
+  {id:'a2',icon:'🔥',name:'Week Streak',desc:'7-day streak',req:d=>d.streak>=7},
+
+  {id:'a3',icon:'?',name:'Low Impact Day',desc:'Under 3 kg in a day',req:d=>d.bestDay<3},
+
+  {id:'a4',icon:'🌱',name:'Plant Pioneer',desc:'5 vegetarian meals logged',req:d=>d.vegMeals>=5},
+
+  {id:'a5',icon:'🏆',name:'Challenge Master',desc:'10 challenges done',req:d=>d.chDone>=10},
+
+  {id:'a6',icon:'🚴',name:'Pedal Hero',desc:'Cycled 50+ km tracked',req:d=>d.cyclekm>=50},
+
+  {id:'a7',icon:'⚡',name:'Energy Saver',desc:'Under 2 kWh logged twice',req:d=>d.lowEnergy>=2}
+
+];
+
+// -------------------------------------------
+
+// STATE
+
+// -------------------------------------------
+
+let S = {
+
+  user:{name:'',country:'india',baseline:4.6},
+
+  logs:[],          // [{date, cats:{t,f,e,s}, total, activities:[{name,co2,cat}]}]
+
+  challenges:{},    // {date:[id]}
+
+  points:0, streak:0, bestStreak:0,
+
+  vegMeals:0, cyclekm:0, lowEnergy:0, chDone:0, bestDay:999, days:0
+
+};
+
+let LOG = {}; // current session log: {actId: co2value}
+
+function save(){try{localStorage.setItem('eco3',JSON.stringify(S))}catch(e){}}
+
+function load(){try{const d=localStorage.getItem('eco3');if(d){S={...S,...JSON.parse(d)};return true}}catch(e){}return false}
+
+// -------------------------------------------
+
+// INIT
+
+// -------------------------------------------
+
+window.addEventListener('DOMContentLoaded',()=>{
+
+  // Try to restore a valid session
+
+  SESSION = loadSession();
+
+  if(SESSION && SESSION.token){
+
+    // Valid session found — restore user and go straight to app
+
+    currentUser = { name: SESSION.name, email: SESSION.email, isGuest: SESSION.email==='guest' };
+
+    document.getElementById('authScreen').classList.add('hide');
+
+    document.getElementById('obModal').classList.add('hide');
+
+    if(load() && S.user.name){
+
+      document.getElementById('shell').style.display='flex';
+
+      document.getElementById('shell').style.flexDirection='column';
+
+      startSessionWatchdog();
+
+      initApp();
+
+      const mins=Math.round((SESSION.expiresAt-Date.now())/60000);
+
+      toast('✅ Session restored — '+mins+' min remaining','ok');
+
+    } else {
+
+      // Has session but no profile yet ? onboarding
+
+      document.getElementById('obModal').classList.remove('hide');
+
+      calcObBaseline();
+
+    }
+
+    return;
+
+  }
+
+  // No valid session — show auth screen
+
+  document.getElementById('authScreen').classList.remove('hide');
+
+  document.getElementById('obModal').classList.add('hide');
+
+  document.getElementById('shell').style.display='none';
+
+  calcObBaseline();
+
+});
+
+function calcObBaseline(){
+
+  const c=parseFloat(document.getElementById('ob-commute')?.value||2.8);
+
+  const d=parseFloat(document.getElementById('ob-diet')?.value||1.8);
+
+  const e=parseFloat(document.getElementById('ob-energy')?.value||1.2);
+
+  const total=(c+d+e).toFixed(1);
+
+  const el=document.getElementById('ob-baseline-val');
+
+  if(el){
+
+    el.innerHTML=total+'<span class="cunit">kg CO2</span>';
+
+    const country=COUNTRY['india'];
+
+    document.getElementById('ob-baseline-note').textContent=
+
+      total<country.daily?'Below India average ('+country.daily+' kg/day) — Great start!':
+
+      'Above India average ('+country.daily+' kg/day) — Let\'s improve!';
+
+  }
+
+}
+
+let obStep=1;
+
+function obNext(n){
+
+  if(n===3)calcObBaseline();
+
+  ['ob1','ob2','ob3'].forEach((id,i)=>{
+
+    document.getElementById(id).classList.toggle('on',i+1===n);
+
+    document.getElementById('odot'+(i+1)).classList.toggle('done',i+1<=n);
+
+  });
+
+  obStep=n;
+
+}
+
+['ob-commute','ob-diet','ob-energy'].forEach(id=>{
+
+  setTimeout(()=>{const el=document.getElementById(id);if(el)el.addEventListener('change',()=>{if(obStep===3)calcObBaseline()})},500);
+
+});
+
+function startApp(){
+
+  const obName=document.getElementById('ob-name').value.trim();
+
+  // Use Google name if signed in, otherwise onboarding name, else Guest
+
+  const name = (!currentUser.isGuest && currentUser.name && currentUser.name!=='Guest')
+
+    ? currentUser.name
+
+    : (obName || (currentUser.isGuest?'Guest':'Explorer'));
+
+  const country=document.getElementById('ob-country').value;
+
+  const c=parseFloat(document.getElementById('ob-commute').value);
+
+  const d=parseFloat(document.getElementById('ob-diet').value);
+
+  const e=parseFloat(document.getElementById('ob-energy').value);
+
+  S.user={name,country,baseline:parseFloat((c+d+e).toFixed(1))};
+
+  save();
+
+  document.getElementById('obModal').classList.add('hide');
+
+  document.getElementById('shell').style.display='flex';
+
+  document.getElementById('shell').style.flexDirection='column';
+
+  initApp();
+
+  toast('Welcome'+( currentUser.isGuest?'':', '+name)+'! 🌍','ok');
+
+}
+
+function initApp(){
+
+  updateTopbar();
+
+  renderDash();
+
+  renderChallenges();
+
+  renderProfile();
+
+  renderCompare();
+
+  renderHistory();
+
+  renderGoals();
+
+  renderTools();
+
+  renderOffsetLinks();
+
+  maybeStartTutorial();
+
+  // Set form defaults
+
+  ['ob-commute','ob-diet','ob-energy'].forEach(id=>{
+
+    const el=document.getElementById(id);
+
+    if(el)el.addEventListener('change',calcObBaseline);
+
+  });
+
+}
+
+// -------------------------------------------
+
+// TAB NAV
+
+// -------------------------------------------
+
+function goTab(id){
+
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+
+  document.getElementById('t-'+id).classList.add('on');
+
+  document.getElementById('p-'+id).classList.add('on');
+
+  if(id==='dash')renderDash();
+
+  if(id==='cmp')renderCompare();
+
+  if(id==='hist')renderHistory();
+
+  if(id==='prof')renderProfile();
+
+  if(id==='ch')renderChallenges();
+
+  if(id==='goals')renderGoals();
+
+  if(id==='tools'){ renderTools(); renderOffsetLinks(); }
+
+}
+
+// -------------------------------------------
+
+// LOG ACTIVITY — CALCULATIONS
+
+// -------------------------------------------
+
+const CO2_FACTORS = {
+
+  car:   (id)=>{ const km=parseFloat(v('in-car-km')||0); const f=parseFloat(v('in-car-fuel')||0.21); return km*f },
+
+  bike:  ()=>{ return parseFloat(v('in-bike-km')||0)*0.11 },
+
+  bus:   ()=>{ return parseFloat(v('in-bus-km')||0)*0.089 },
+
+  train: ()=>{ return parseFloat(v('in-train-km')||0)*0.041 },
+
+  flight:()=>{ const km=parseFloat(v('in-flight-km')||0); const t=parseFloat(v('in-flight-type')||1); return km*0.255*t },
+
+  meals: ()=>{
+
+    const b=parseFloat(v('in-meals-b')||0);
+
+    const l=parseFloat(v('in-meals-l')||0);
+
+    const d=parseFloat(v('in-meals-d')||0);
+
+    const w=parseFloat(v('in-meals-waste')||0);
+
+    return b+l+d+w;
+
+  },
+
+  dairy: ()=>{ return parseFloat(v('in-dairy-n')||0)*0.35 },
+
+  ac:    ()=>{ const h=parseFloat(v('in-ac-h')||0); const kw=parseFloat(v('in-ac-ton')||1.28); return h*kw*0.85 },
+
+  geyser:()=>{ const m=parseFloat(v('in-geyser-m')||0); return (m/60)*2*0.85 },
+
+  elec:  ()=>{ return parseFloat(v('in-elec-kwh')||0)*0.85 },
+
+  lpg:   ()=>{ return parseFloat(v('in-lpg-h')||0)*0.22 },
+
+  clothes:()=>{ const cost=parseFloat(v('in-clothes-type')||2.5); const qty=parseFloat(v('in-clothes-qty')||1); return cost*qty },
+
+  online:()=>{ return parseFloat(v('in-online-n')||0)*0.5 },
+
+  plastic:()=>{ return parseFloat(v('in-plastic-n')||0)*0.05 }
+
+};
+
+function v(id){const el=document.getElementById(id);return el?el.value:'0'}
+
+function calcAct(id){
+
+  if(!CO2_FACTORS[id])return;
+
+  const co2=Math.max(0,CO2_FACTORS[id]());
+
+  LOG[id]=co2;
+
+  // Update badge
+
+  const badge=document.getElementById('co2-'+id);
+
+  if(badge){
+
+    badge.textContent=co2.toFixed(2)+' kg';
+
+    badge.className='act-item-co2'+(co2>5?' bad':co2>2?' med':'');
+
+  }
+
+  updateRunningTotal();
+
+}
+
+function togAct(itemId){
+
+  const el=document.getElementById(itemId);
+
+  const actId=itemId.replace('ai-','');
+
+  const isOn=el.classList.contains('selected');
+
+  el.classList.toggle('selected',!isOn);
+
+  document.getElementById('tog-'+actId).textContent=isOn?'':'?';
+
+  if(!isOn){
+
+    calcAct(actId);
+
+  } else {
+
+    delete LOG[actId];
+
+    const badge=document.getElementById('co2-'+actId);
+
+    if(badge){badge.textContent='— kg';badge.className='act-item-co2';}
+
+    updateRunningTotal();
+
+  }
+
+}
+
+function updateRunningTotal(){
+
+  const cats={t:0,f:0,e:0,s:0};
+
+  const catMap={car:'t',bike:'t',bus:'t',train:'t',flight:'t',meals:'f',dairy:'f',ac:'e',geyser:'e',elec:'e',lpg:'e',clothes:'s',online:'s',plastic:'s'};
+
+  Object.entries(LOG).forEach(([id,co2])=>{if(catMap[id])cats[catMap[id]]+=co2});
+
+  const total=Object.values(cats).reduce((a,b)=>a+b,0);
+
+  document.getElementById('logRunning').textContent=total.toFixed(2)+' kg CO2';
+
+  const pct=Math.min(total/30*100,100);
+
+  document.getElementById('logRunningBar').style.width=pct+'%';
+
+  ['t','f','e','s'].forEach(c=>{
+
+    const el=document.getElementById('cat-'+c);
+
+    if(el)el.textContent=cats[c].toFixed(2)+' kg CO2';
+
+  });
+
+}
+
+function clearLog(){
+
+  LOG={};
+
+  // Clear all inputs
+
+  document.querySelectorAll('.act-item').forEach(el=>{
+
+    el.classList.remove('selected');
+
+    const id=el.id.replace('ai-','');
+
+    const tog=document.getElementById('tog-'+id);
+
+    if(tog)tog.textContent='';
+
+    const badge=document.getElementById('co2-'+id);
+
+    if(badge){badge.textContent='— kg';badge.className='act-item-co2';}
+
+  });
+
+  document.querySelectorAll('.act-inputs input[type=number]').forEach(el=>el.value='');
+
+  document.querySelectorAll('.act-inputs input[type=range]').forEach(el=>{el.value=0});
+
+  document.querySelectorAll('.slider-val').forEach(el=>el.textContent='0');
+
+  updateRunningTotal();
+
+}
+
+function submitLog(){
+
+  const total=Object.values(LOG).reduce((a,b)=>a+b,0);
+
+  if(total<=0){toast('Select and fill in at least one activity first!','err');return;}
+
+  const cats={t:0,f:0,e:0,s:0};
+
+  const catMap={car:'t',bike:'t',bus:'t',train:'t',flight:'t',meals:'f',dairy:'f',ac:'e',geyser:'e',elec:'e',lpg:'e',clothes:'s',online:'s',plastic:'s'};
+
+  const catNames={t:'Transport',f:'Food',e:'Energy',s:'Shopping'};
+
+  const activities=[];
+
+  Object.entries(LOG).forEach(([id,co2])=>{
+
+    if(co2>0&&catMap[id]){
+
+      cats[catMap[id]]+=co2;
+
+      activities.push({id,co2:parseFloat(co2.toFixed(3)),cat:catMap[id]});
+
+    }
+
+  });
+
+  const today=todayStr();
+
+  S.logs=S.logs.filter(l=>l.date!==today);
+
+  S.logs.push({date:today,cats,total:parseFloat(total.toFixed(3)),activities});
+
+  S.logs.sort((a,b)=>a.date<b.date?1:-1);
+
+  // Track stats
+
+  S.days=S.logs.length;
+
+  if(total<S.bestDay)S.bestDay=total;
+
+  // Count veg meals
+
+  if(document.getElementById('ai-meals').classList.contains('selected')){
+
+    const b=v('in-meals-b'),l=v('in-meals-l'),d=v('in-meals-d');
+
+    if(parseFloat(b)<=0.2||b==='0')S.vegMeals++;
+
+  }
+
+  const km=parseFloat(v('in-bike-km')||0);
+
+  S.cyclekm+=km;
+
+  const kwh=parseFloat(v('in-elec-kwh')||0);
+
+  if(kwh>0&&kwh<2)S.lowEnergy++;
+
+  updateStreak();
+
+  save();
+
+  clearLog();
+
+  toast('? Logged! '+total.toFixed(2)+' kg CO2 saved to history','ok');
+
+  goTab('dash');
+
+}
+
+// -------------------------------------------
+
+// DASHBOARD
+
+// -------------------------------------------
+
+function renderDash(){
+
+  if(!S.user.name)return;
+
+  const hr=new Date().getHours();
+
+  const g=hr<12?'Good morning':hr<17?'Good afternoon':'Good evening';
+
+  document.getElementById('dashGreet').textContent=g+', '+S.user.name+'!';
+
+  const today=todayStr();
+
+  const log=S.logs.find(l=>l.date===today);
+
+  const todayCo2=log?log.total:null;
+
+  document.getElementById('dToday').innerHTML=(todayCo2!==null?todayCo2.toFixed(2):'—')+'<span class="cunit">kg</span>';
+
+  // Weekly avg
+
+  const wk=S.logs.slice(0,7);
+
+  const wkAvg=wk.length?wk.reduce((a,l)=>a+l.total,0)/wk.length:null;
+
+  document.getElementById('dWeekAvg').innerHTML=(wkAvg?wkAvg.toFixed(2):'—')+'<span class="cunit">kg/day</span>';
+
+  // Delta
+
+  const dEl=document.getElementById('dTodayD');
+
+  if(todayCo2!==null&&wk.length>1){
+
+    const prev=wk.find(l=>l.date!==today);
+
+    if(prev){
+
+      const diff=todayCo2-prev.total;
+
+      dEl.className='cdelta '+(diff<0?'down':diff>0?'up':'flat');
+
+      dEl.textContent=(diff<0?'? ':'? ')+Math.abs(diff).toFixed(2)+' kg vs yesterday';
+
+    }
+
+  } else {
+
+    dEl.className='cdelta flat';
+
+    dEl.textContent=todayCo2===null?'Nothing logged yet today':'First log today!';
+
+  }
+
+  // Score
+
+  const score=todayCo2!==null?calcScore(todayCo2):null;
+
+  document.getElementById('dScore').innerHTML=(score!==null?score:'—')+'<span class="cunit">/100</span>';
+
+  const {grade,col}=score!==null?getGrade(score):{grade:'—',col:'var(--tx3)'};
+
+  document.getElementById('dGrade').innerHTML=`<span style="color:${col}">${grade}</span>`;
+
+  document.getElementById('topScore').textContent='Score: '+(score!==null?score:'—');
+
+  // Trees
+
+  const wkTotal=wk.reduce((a,l)=>a+l.total,0);
+
+  document.getElementById('dTrees').innerHTML=Math.ceil(wkTotal/22)+'<span class="cunit">🌳</span>';
+
+  document.getElementById('dashSub').textContent='Baseline: ~'+S.user.baseline+' kg/day • Today: '+(todayCo2!==null?todayCo2.toFixed(2)+' kg logged':'nothing logged yet');
+
+  // Score ring
+
+  const arc=document.getElementById('ringArc');
+
+  const circ=2*Math.PI*65;
+
+  if(score!==null){
+
+    arc.style.strokeDashoffset=circ-(score/100)*circ;
+
+    arc.style.stroke=score>=70?'url(#rg)':score>=40?'var(--a2)':'var(--r2)';
+
+    document.getElementById('ringNum').textContent=score;
+
+    document.getElementById('ringGrade').textContent=grade.replace(/[^\w\s]/g,'').trim().toUpperCase();
+
+    document.getElementById('ringMsg').textContent=getScoreMsg(score);
+
+  } else {
+
+    arc.style.strokeDashoffset=circ;
+
+    document.getElementById('ringNum').textContent='—';
+
+    document.getElementById('ringGrade').textContent='LOG ACTIVITY';
+
+    document.getElementById('ringMsg').textContent='Log your first activity to get your carbon score';
+
+  }
+
+  // Category bars
+
+  const cats=log?log.cats:{t:0,f:0,e:0,s:0};
+
+  const maxC=Math.max(...Object.values(cats),1);
+
+  [{k:'t',el:'bf-t',ve:'bv-t'},{k:'f',el:'bf-f',ve:'bv-f'},{k:'e',el:'bf-e',ve:'bv-e'},{k:'s',el:'bf-s',ve:'bv-s'}]
+
+    .forEach(({k,el,ve})=>{
+
+      document.getElementById(el).style.width=(cats[k]/maxC*100)+'%';
+
+      document.getElementById(ve).textContent=cats[k].toFixed(2)+' kg';
+
+    });
+
+  // Earth meter
+
+  const fair=5.5;
+
+  const ratio=todayCo2!==null?Math.min(todayCo2/fair,2):0;
+
+  const filled=Math.round(ratio*20);
+
+  const dots=document.getElementById('earthDots');
+
+  dots.innerHTML=Array.from({length:20},(_,i)=>`<div class="edot${i<filled?' on':''}"></div>`).join('');
+
+  document.getElementById('earthEmoji').textContent=ratio===0?'🌍':ratio<=0.5?'🌿':ratio<=1?'🌎':'🔥';
+
+  document.getElementById('earthTxt').textContent=todayCo2===null?'Log activities to see your planetary impact':
+
+    ratio<=0.5?`Only ${(ratio*100).toFixed(0)}% of your daily fair share — excellent!`:
+
+    ratio<=1?`Using ${(ratio*100).toFixed(0)}% of your daily "fair share" of Earth's carbon budget`:
+
+    `Using ${ratio.toFixed(1)}× your fair share — let's work on this`;
+
+  // Impact stories
+
+  renderImpactStories(todayCo2||wkAvg||0);
+
+  // Trend
+
+  drawTrend();
+
+  updateStreak();
+
+}
+
+function renderImpactStories(co2){
+
+  const stories=[
+
+    {icon:'🚗',title:`${(co2/0.21).toFixed(0)} km driven`,text:'That\'s how far a petrol car would need to drive to match your footprint'},
+
+    {icon:'📱',title:`${(co2/0.007).toFixed(0)} phone charges`,text:'Your CO2 could charge that many smartphones'},
+
+    {icon:'🌳',title:`${(co2/22*52).toFixed(1)} trees/year`,text:'Number of trees needed to absorb this much CO2 annually'},
+
+    {icon:'💧',title:`${(co2*1000/4).toFixed(0)} litres saved by being vegan`,text:'Meat production uses that much more water than plant foods'},
+
+  ];
+
+  document.getElementById('impactStories').innerHTML=stories.slice(0,2).map(s=>`
+
+<div class="impact-story">
+
+<div class="impact-icon">${s.icon}</div>
+
+<div><div class="impact-title">${s.title}</div><div class="impact-text">${s.text}</div></div>
+
+</div>`).join('');
+
+}
+
+function calcScore(co2){
+
+  const max=40;
+
+  return Math.max(0,Math.round(100-(co2/max)*100));
+
+}
+
+function getGrade(s){
+
+  if(s>=90)return{grade:'Planet Hero 🌍',col:'var(--g2)'};
+
+  if(s>=70)return{grade:'Eco Champion ?',col:'var(--g2)'};
+
+  if(s>=50)return{grade:'Green Learner 🌱',col:'var(--t2)'};
+
+  if(s>=30)return{grade:'Needs Work ⚠️',col:'var(--a2)'};
+
+  return{grade:'High Impact 🔴',col:'var(--r2)'};
+
+}
+
+function getScoreMsg(s){
+
+  if(s>=90)return'Outstanding! You\'re living sustainably today.';
+
+  if(s>=70)return'Great job — small tweaks could push you further.';
+
+  if(s>=50)return'Good effort. Check AI Insights for improvement tips.';
+
+  if(s>=30)return'Your impact is above average. Let\'s reduce it together.';
+
+  return'High impact day! See your Challenges for quick wins.';
+
+}
+
+function drawTrend(){
+
+  const c=document.getElementById('trendC');if(!c)return;
+
+  const dpr=window.devicePixelRatio||1;
+
+  const W=c.parentElement.clientWidth||280,H=140;
+
+  c.width=W*dpr;c.height=H*dpr;c.style.width=W+'px';c.style.height=H+'px';
+
+  const ctx=c.getContext('2d');ctx.scale(dpr,dpr);
+
+  const pad={t:12,r:12,b:26,l:34};
+
+  const w=W-pad.l-pad.r,h=H-pad.t-pad.b;
+
+  const days=[];
+
+  for(let i=6;i>=0;i--){
+
+    const d=new Date();d.setDate(d.getDate()-i);
+
+    const str=d.toISOString().split('T')[0];
+
+    const log=S.logs.find(l=>l.date===str);
+
+    days.push({lbl:d.toLocaleDateString('en',{weekday:'short'}),val:log?log.total:null});
+
+  }
+
+  const vals=days.map(d=>d.val!==null?d.val:0);
+
+  const maxV=Math.max(...vals,5);
+
+  ctx.clearRect(0,0,W,H);
+
+  // Grid
+
+  ctx.strokeStyle='#213328';ctx.lineWidth=1;
+
+  for(let i=0;i<=3;i++){const y=pad.t+(i/3)*h;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+w,y);ctx.stroke();}
+
+  // Fill
+
+  const pts=days.map((d,i)=>({x:pad.l+(i/(days.length-1))*w,y:pad.t+(1-vals[i]/maxV)*h}));
+
+  const grad=ctx.createLinearGradient(0,pad.t,0,pad.t+h);
+
+  grad.addColorStop(0,'rgba(29,185,84,.22)');grad.addColorStop(1,'rgba(29,185,84,0)');
+
+  ctx.beginPath();ctx.moveTo(pts[0].x,pad.t+h);
+
+  pts.forEach(p=>ctx.lineTo(p.x,p.y));
+
+  ctx.lineTo(pts[pts.length-1].x,pad.t+h);ctx.closePath();ctx.fillStyle=grad;ctx.fill();
+
+  // Line
+
+  ctx.beginPath();ctx.strokeStyle='#1db954';ctx.lineWidth=2.2;ctx.lineJoin='round';ctx.lineCap='round';
+
+  pts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));ctx.stroke();
+
+  // Dots
+
+  pts.forEach((p,i)=>{
+
+    ctx.beginPath();ctx.arc(p.x,p.y,4,0,Math.PI*2);
+
+    ctx.fillStyle=days[i].val!==null?'#1db954':'#213328';ctx.fill();
+
+    ctx.strokeStyle='#070d09';ctx.lineWidth=1.5;ctx.stroke();
+
+  });
+
+  // Labels
+
+  ctx.fillStyle='#6b8f72';ctx.font='9px Space Mono, monospace';ctx.textAlign='center';
+
+  days.forEach((d,i)=>ctx.fillText(d.lbl,pad.l+(i/(days.length-1))*w,H-6));
+
+  ctx.textAlign='right';ctx.fillText(maxV.toFixed(0),pad.l-3,pad.t+4);ctx.fillText('0',pad.l-3,pad.t+h+4);
+
+}
+
+// -------------------------------------------
+
+// CHALLENGES
+
+// -------------------------------------------
+
+function renderChallenges(){
+
+  document.getElementById('totalPts').textContent=S.points;
+
+  const today=todayStr();
+
+  const done=S.challenges[today]||[];
+
+  // Week dots
+
+  const wdEl=document.getElementById('wdots');
+
+  wdEl.innerHTML=Array.from({length:7},(_,i)=>{
+
+    const d=new Date();d.setDate(d.getDate()-(6-i));
+
+    const str=d.toISOString().split('T')[0];
+
+    const logged=S.logs.find(l=>l.date===str);
+
+    const lbl=d.toLocaleDateString('en',{weekday:'short'});
+
+    return`<div class="wdot"><div class="wdot-circle${logged?' logged':''}">${logged?'?':'•'}</div><div class="wdot-lbl">${lbl}</div></div>`;
+
+  }).join('');
+
+  document.getElementById('chList').innerHTML=CHALLENGES.map(c=>{
+
+    const isDone=done.includes(c.id);
+
+    return`<div class="ch-item${isDone?' done':''}">
+
+<div class="ch-check" onclick="togChallenge('${c.id}')">${isDone?'?':''}</div>
+
+<div class="ch-info">
+
+<div class="ch-name">${c.icon} ${c.name}</div>
+
+<div class="ch-meta">${c.desc} — saves ~${c.saving} kg CO2</div>
+
+<div class="ch-pbar"><div class="ch-pfill" style="width:${isDone?100:0}%"></div></div>
+
+</div>
+
+<div class="ch-pts">+${c.pts}pts</div>
+
+</div>`;
+
+  }).join('');
+
+  // Leaderboard
+
+  const lb=[
+
+    {name:'GreenNinja',pts:420},{name:'EcoWarrior',pts:380},
+
+    {name:S.user.name||'You',pts:S.points,me:true},
+
+    {name:'CarbonHero',pts:290},{name:'PlanetPal',pts:220}
+
+  ].sort((a,b)=>b.pts-a.pts);
+
+  document.getElementById('lbList').innerHTML=lb.map((p,i)=>`
+
+<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--b1)">
+
+<div class="mono xs" style="width:20px;color:${i<3?'var(--a2)':'var(--tx3)'}">${i+1}</div>
+
+<div style="flex:1;font-size:13px;${p.me?'color:var(--g2);font-weight:600;':''}">${p.me?'? ':''} ${p.name}</div>
+
+<div class="mono xs text-a">${p.pts} pts</div>
+
+</div>`).join('');
+
+}
+
+function togChallenge(id){
+
+  const today=todayStr();
+
+  if(!S.challenges[today])S.challenges[today]=[];
+
+  const idx=S.challenges[today].indexOf(id);
+
+  const ch=CHALLENGES.find(c=>c.id===id);
+
+  if(idx===-1){
+
+    S.challenges[today].push(id);
+
+    S.points+=ch.pts;
+
+    S.chDone=(S.chDone||0)+1;
+
+    toast('✅ +'+ch.pts+' points! Challenge complete 🏆','ok');
+
+  } else {
+
+    S.challenges[today].splice(idx,1);
+
+    S.points=Math.max(0,S.points-ch.pts);
+
+  }
+
+  save();renderChallenges();
+
+}
+
+// -------------------------------------------
+
+// COMPARE
+
+// -------------------------------------------
+
+function renderCompare(){
+
+  const wk=S.logs.slice(0,7);
+
+  const wkAvg=wk.length?wk.reduce((a,l)=>a+l.total,0)/wk.length:0;
+
+  const country=COUNTRY[S.user.country]||COUNTRY.india;
+
+  const entries=[
+
+    {lbl:S.user.name||'You',val:wkAvg,col:wkAvg<=country.daily?'var(--g2)':'var(--r2)',me:true},
+
+    {lbl:country.lbl,val:country.daily,col:'var(--t2)'},
+
+    {lbl:'Global Avg',val:13.5,col:'var(--a2)'},
+
+    {lbl:'India Avg',val:4.6,col:'var(--p2)'},
+
+    {lbl:'1.5°C Target',val:4.11,col:'var(--tx3)'}
+
+  ];
+
+  const maxV=Math.max(...entries.map(e=>e.val),1);
+
+  document.getElementById('cmpChart').innerHTML=entries.map(e=>`
+
+<div class="cmp-row">
+
+<div class="cmp-lbl" style="${e.me?'font-weight:600;color:var(--tx);':''}">${e.me?'? ':''}${e.lbl}</div>
+
+<div class="cmp-bwrap"><div class="cmp-mbar" style="width:${(e.val/maxV*100)}%;background:${e.col};height:6px;border-radius:3px;"></div></div>
+
+<div class="cmp-val" style="color:${e.col}">${e.val.toFixed(1)} kg</div>
+
+</div>`).join('');
+
+  const annual=wkAvg*365/1000;
+
+  document.getElementById('annualEst').innerHTML=annual.toFixed(2)+'<span class="cunit">t CO2</span>';
+
+  document.getElementById('reductionNeed').innerHTML=Math.max(0,annual-1.5).toFixed(2)+'<span class="cunit">t to cut</span>';
+
+  // Equivalents
+
+  const co2=wkAvg||S.user.baseline;
+
+  document.getElementById('equivList').innerHTML=[
+
+    {icon:'🚗',v:`${(co2/0.21).toFixed(0)} km`,d:'in a petrol car'},
+
+    {icon:'?',v:`${(co2/0.35).toFixed(0)} chai`,d:'cups (with milk)'},
+
+    {icon:'💡',v:`${(co2/0.015).toFixed(0)} hrs`,d:'of LED light'},
+
+    {icon:'🌳',v:`${(co2/22*365).toFixed(1)} trees`,d:'needed per year to offset'}
+
+  ].map(e=>`<div class="flex gap8 aic"><span style="font-size:20px">${e.icon}</span><div><div style="font-size:13px;font-weight:600">${e.v}</div><div class="xs text-m">${e.d}</div></div></div>`).join('');
+
+  // Visualiser
+
+  const cnt=Math.min(Math.round(co2*10),200);
+
+  document.getElementById('impactViz').innerHTML=cnt>0?Array(cnt).fill('🌿').join(''):'<span class="xs text-m">Log activities to see your impact visualised</span>';
+
+}
+
+// -------------------------------------------
+
+// HISTORY
+
+// -------------------------------------------
+
+function renderHistory(){
+
+  const empty=document.getElementById('histEmpty');
+
+  const content=document.getElementById('histContent');
+
+  if(!S.logs.length){empty.style.display='';content.style.display='none';return;}
+
+  empty.style.display='none';content.style.display='';
+
+  const catLbl={t:'Transport',f:'Food',e:'Energy',s:'Shopping'};
+
+  const catCls={t:'t',f:'f',e:'e',s:'s'};
+
+  document.getElementById('histBody').innerHTML=S.logs.map(log=>{
+
+    const score=calcScore(log.total);
+
+    const {grade}=getGrade(score);
+
+    const bCls=score>=70?'b-g':score>=40?'b-a':'b-r';
+
+    const topCat=Object.entries(log.cats).sort((a,b)=>b[1]-a[1])[0];
+
+    return`<tr>
+
+<td class="mono">${log.date}</td>
+
+<td class="mono">${log.total.toFixed(2)} kg</td>
+
+<td><span class="badge ${bCls}">${score}</span></td>
+
+<td><span class="ctag ${catCls[topCat[0]]}">${catLbl[topCat[0]]}</span></td>
+
+<td class="xs text-m">${log.activities.map(a=>a.id).join(', ')}</td>
+
+</tr>`;
+
+  }).join('');
+
+}
+
+function clearHistory(){
+
+  if(!confirm('Delete all history?'))return;
+
+  S.logs=[];S.days=0;S.bestDay=999;save();
+
+  renderHistory();renderDash();toast('History cleared','ok');
+
+}
+
+// -------------------------------------------
+
+// PROFILE
+
+// -------------------------------------------
+
+function renderProfile(){
+
+  document.getElementById('profName').textContent=S.user.name||'—';
+
+  document.getElementById('profCountry').textContent=(COUNTRY[S.user.country]||COUNTRY.india).lbl;
+
+  document.getElementById('profBaseline').textContent='Estimated baseline: '+S.user.baseline+' kg CO2/day';
+
+  document.getElementById('setName').value=S.user.name||'';
+
+  document.getElementById('setCountry').value=S.user.country||'india';
+
+  document.getElementById('ps-days').textContent=S.logs.length;
+
+  document.getElementById('ps-total').textContent=S.logs.reduce((a,l)=>a+l.total,0).toFixed(1);
+
+  document.getElementById('ps-streak').textContent=S.bestStreak||S.streak;
+
+  document.getElementById('ps-pts').textContent=S.points;
+
+  document.getElementById('streakNum').textContent=S.streak;
+
+  // Session info
+
+  const si=document.getElementById('sessionInfo');
+
+  if(si && SESSION){
+
+    const left=Math.max(0,SESSION.expiresAt-Date.now());
+
+    const h=Math.floor(left/3600000);
+
+    const m=Math.floor((left%3600000)/60000);
+
+    const type=currentUser.isGuest?'Guest session':'Account: '+currentUser.email;
+
+    si.innerHTML=`${type} • <span style="color:var(--g2)">Expires in ${h}h ${m}m</span>${SESSION.rememberMe?' • Remember me active':''}`;
+
+  }
+
+  document.getElementById('achList').innerHTML=ACHIEVEMENTS.map(a=>{
+
+    const earned=a.req({days:S.logs.length,streak:S.streak,bestDay:S.bestDay,vegMeals:S.vegMeals,chDone:S.chDone,cyclekm:S.cyclekm,lowEnergy:S.lowEnergy});
+
+    return`<div title="${a.desc}" style="display:flex;align-items:center;gap:7px;padding:7px 11px;border-radius:9px;
+
+      background:${earned?'rgba(29,185,84,.1)':'var(--s2)'};border:1px solid ${earned?'rgba(29,185,84,.3)':'var(--b1)'};
+
+      opacity:${earned?1:.4};filter:${earned?'none':'grayscale(1)'}">
+
+<span style="font-size:18px">${a.icon}</span>
+
+<span style="font-size:12px;font-weight:600">${a.name}</span>
+
+</div>`;
+
+  }).join('');
+
+}
+
+function saveSettings(){
+
+  S.user.name=document.getElementById('setName').value.trim()||S.user.name;
+
+  S.user.country=document.getElementById('setCountry').value;
+
+  save();renderProfile();toast('Settings saved ?','ok');
+
+}
+
+function signOut(){
+
+  showConfirmModal(
+
+    '🚪 Sign Out',
+
+    'Sign out of EcoSense? Your carbon data stays saved and will be here when you return.',
+
+    'Sign Out',
+
+    ()=>{
+
+      clearSession();
+
+      currentUser = { name:'', email:'', isGuest:false };
+
+      document.getElementById('shell').style.display='none';
+
+      document.getElementById('lockScreen').classList.remove('on');
+
+      const as = document.getElementById('authScreen');
+
+      as.classList.remove('hide');
+
+      switchAuthTab('login');
+
+      clearAuthMsg();
+
+      // Clear input fields
+
+      ['login-email','login-pw','reg-name','reg-email','reg-pw','reg-pw2'].forEach(id=>{
+
+        const el=document.getElementById(id); if(el) el.value='';
+
+      });
+
+      toast('Signed out. See you soon! 👋','ok');
+
+    }
+
+  );
+
+}
+
+function resetAll(){
+
+  showConfirmModal(
+
+    '⚠️ Reset All Data',
+
+    'This will permanently delete ALL your logs, settings, account, and API keys. This cannot be undone.',
+
+    'Delete Everything',
+
+    ()=>{
+
+      clearSession();
+
+      ['eco3','eco3_users','eco3_fails','eco3_keys'].forEach(k=>localStorage.removeItem(k));
+
+      location.reload();
+
+    },
+
+    true // danger mode
+
+  );
+
+}
+
+// -------------------------------------------
+
+// STREAK
+
+// -------------------------------------------
+
+function todayStr(){return new Date().toISOString().split('T')[0]}
+
+function updateStreak(){
+
+  const dates=S.logs.map(l=>l.date).sort().reverse();
+
+  if(!dates.length){S.streak=0;return;}
+
+  let streak=1,d=new Date(dates[0]);
+
+  for(let i=1;i<dates.length;i++){
+
+    const prev=new Date(dates[i]);
+
+    if((d-prev)/86400000===1){streak++;d=prev;}else break;
+
+  }
+
+  S.streak=streak;
+
+  if(streak>S.bestStreak)S.bestStreak=streak;
+
+  document.getElementById('streakNum').textContent=streak;
+
+}
+
+function updateTopbar(){
+
+  document.getElementById('streakNum').textContent=S.streak;
+
+  updateGuestUI();
+
+}
+
+// -------------------------------------------
+
+// AUTH — Secure session system
+
+// SHA-256 hash • Session tokens • 2h expiry
+
+// Brute-force lockout • Rate limiting
+
+// -------------------------------------------
+
+let currentUser = { name:'', email:'', isGuest:false };
+
+// -- SHA-256 via WebCrypto (no library needed) --
+
+async function sha256(str){
+
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+
+}
+
+// -- Cryptographically secure token generator --
+
+function genToken(len=48){
+
+  const arr = new Uint8Array(len);
+
+  crypto.getRandomValues(arr);
+
+  return Array.from(arr).map(b=>b.toString(16).padStart(2,'0')).join('');
+
+}
+
+// -- User DB (localStorage) --
+
+const USER_DB_KEY = 'eco3_users';
+
+function getUsers(){ try{ return JSON.parse(localStorage.getItem(USER_DB_KEY)||'{}'); }catch(e){ return {}; } }
+
+function setUsers(db){ try{ localStorage.setItem(USER_DB_KEY, JSON.stringify(db)); }catch(e){} }
+
+// -- Session store --
+
+const SESSION_KEY = 'eco3_session';
+
+const SESSION_DURATION = 30 * 60 * 1000;   // 30 minutes
+
+const SESSION_WARN_AT  = 5  * 60 * 1000;   // warn 5 min before expiry
+
+let SESSION = null;   // { token, email, name, expiresAt, rememberMe }
+
+let _sessionTimer = null;
+
+let _sessionCountdown = null;
+
+function loadSession(){
+
+  try{
+
+    const raw = localStorage.getItem(SESSION_KEY);
+
+    if(!raw) return null;
+
+    const s = JSON.parse(raw);
+
+    // Expired?
+
+    if(Date.now() > s.expiresAt){ clearSession(); return null; }
+
+    return s;
+
+  }catch(e){ return null; }
+
+}
+
+function createSession(email, name, rememberMe=false){
+
+  const token = genToken();
+
+  const expiresAt = Date.now() + (rememberMe ? 30*24*60*60*1000 : SESSION_DURATION);
+
+  SESSION = { token, email, name, expiresAt, rememberMe, createdAt: Date.now() };
+
+  localStorage.setItem(SESSION_KEY, JSON.stringify(SESSION));
+
+  startSessionWatchdog();
+
+  return SESSION;
+
+}
+
+function clearSession(){
+
+  SESSION = null;
+
+  localStorage.removeItem(SESSION_KEY);
+
+  if(_sessionTimer) clearTimeout(_sessionTimer);
+
+  if(_sessionCountdown) clearInterval(_sessionCountdown);
+
+  hideBanner();
+
+}
+
+function extendSession(){
+
+  if(!SESSION) return;
+
+  SESSION.expiresAt = Date.now() + SESSION_DURATION;
+
+  localStorage.setItem(SESSION_KEY, JSON.stringify(SESSION));
+
+  startSessionWatchdog();
+
+  hideBanner();
+
+  toast('? Session extended by 30 minutes','ok');
+
+}
+
+function hideBanner(){
+
+  const b = document.getElementById('sessionBanner');
+
+  if(b) b.style.display='none';
+
+}
+
+function startSessionWatchdog(){
+
+  if(_sessionTimer) clearTimeout(_sessionTimer);
+
+  if(_sessionCountdown) clearInterval(_sessionCountdown);
+
+  if(!SESSION) return;
+
+  const remaining = SESSION.expiresAt - Date.now();
+
+  if(remaining <= 0){ lockScreen(); return; }
+
+  // Lock when time runs out
+
+  _sessionTimer = setTimeout(lockScreen, remaining);
+
+  // Show warning banner 10 min before
+
+  const warnIn = remaining - SESSION_WARN_AT;
+
+  if(warnIn > 0){
+
+    setTimeout(()=>{ if(SESSION) startCountdownBanner(); }, warnIn);
+
+  } else {
+
+    startCountdownBanner(); // already in warning zone
+
+  }
+
+}
+
+function startCountdownBanner(){
+
+  const banner = document.getElementById('sessionBanner');
+
+  const cd = document.getElementById('sessionCountdown');
+
+  if(!banner||!cd) return;
+
+  banner.style.display='flex';
+
+  _sessionCountdown = setInterval(()=>{
+
+    if(!SESSION){ hideBanner(); clearInterval(_sessionCountdown); return; }
+
+    const left = Math.max(0, SESSION.expiresAt - Date.now());
+
+    const m = Math.floor(left/60000);
+
+    const s = Math.floor((left%60000)/1000);
+
+    cd.textContent = `${m}m ${s.toString().padStart(2,'0')}s`;
+
+    if(left <= 0){ clearInterval(_sessionCountdown); lockScreen(); }
+
+  }, 1000);
+
+}
+
+function lockScreen(){
+
+  clearSession();
+
+  document.getElementById('shell').style.display='none';
+
+  document.getElementById('lockScreen').classList.add('on');
+
+}
+
+function reAuthFromLock(){
+
+  document.getElementById('lockScreen').classList.remove('on');
+
+  document.getElementById('authScreen').classList.remove('hide');
+
+  switchAuthTab('login');
+
+}
+
+// -- Brute-force protection --
+
+const FAIL_KEY = 'eco3_fails';
+
+const MAX_FAILS = 5;
+
+const LOCKOUT_MS = 15 * 60 * 1000; // 15 min
+
+function getFailRecord(email){
+
+  try{ const d=JSON.parse(localStorage.getItem(FAIL_KEY)||'{}'); return d[email]||{count:0,since:0}; }catch(e){ return {count:0,since:0}; }
+
+}
+
+function incFail(email){
+
+  try{
+
+    const d=JSON.parse(localStorage.getItem(FAIL_KEY)||'{}');
+
+    const rec=d[email]||{count:0,since:Date.now()};
+
+    rec.count++;rec.since=rec.since||Date.now();
+
+    d[email]=rec;localStorage.setItem(FAIL_KEY,JSON.stringify(d));
+
+    return rec;
+
+  }catch(e){ return {count:1,since:Date.now()}; }
+
+}
+
+function clearFails(email){
+
+  try{ const d=JSON.parse(localStorage.getItem(FAIL_KEY)||'{}'); delete d[email]; localStorage.setItem(FAIL_KEY,JSON.stringify(d)); }catch(e){}
+
+}
+
+function isLockedOut(email){
+
+  const rec=getFailRecord(email);
+
+  if(rec.count < MAX_FAILS) return false;
+
+  if(Date.now()-rec.since > LOCKOUT_MS){ clearFails(email); return false; }
+
+  return true;
+
+}
+
+// -- AUTH UI helpers --
+
+function switchAuthTab(tab){
+
+  ['login','register','forgot'].forEach(t=>{
+
+    document.getElementById('aview-'+t)?.classList.toggle('on', t===tab);
+
+  });
+
+  ['login','register'].forEach(t=>{
+
+    document.getElementById('atab-'+t)?.classList.toggle('on', t===tab);
+
+  });
+
+  clearAuthMsg();
+
+}
+
+function showForgot(){ switchAuthTab('forgot'); }
+
+function showAuthErr(msg){
+
+  const el=document.getElementById('authErr');
+
+  if(el){ el.textContent=msg; el.style.display='block'; }
+
+}
+
+function showAuthOk(msg){
+
+  const el=document.getElementById('authOk');
+
+  if(el){ el.textContent=msg; el.style.display='block'; }
+
+}
+
+function clearAuthMsg(){
+
+  ['authErr','authOk'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
+
+}
+
+// -- Password strength --
+
+function checkPwStrength(pw){
+
+  const bar=document.getElementById('pwBar');
+
+  const lbl=document.getElementById('pwLabel');
+
+  if(!bar||!lbl) return;
+
+  let score=0;
+
+  if(pw.length>=8) score++;
+
+  if(pw.length>=12) score++;
+
+  if(/[A-Z]/.test(pw)) score++;
+
+  if(/[0-9]/.test(pw)) score++;
+
+  if(/[^A-Za-z0-9]/.test(pw)) score++;
+
+  const levels=['','Weak','Fair','Good','Strong','Very Strong'];
+
+  const colors=['','var(--r2)','var(--a2)','var(--a2)','var(--g2)','var(--g2)'];
+
+  bar.style.width=(score/5*100)+'%';
+
+  bar.style.background=colors[score]||'var(--b2)';
+
+  lbl.textContent=levels[score]||'';
+
+  lbl.style.color=colors[score]||'var(--tx3)';
+
+}
+
+// -- Email validation --
+
+function validEmail(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+// -- REGISTER --
+
+async function doRegister(){
+
+  clearAuthMsg();
+
+  const name  = document.getElementById('reg-name').value.trim();
+
+  const email = document.getElementById('reg-email').value.trim().toLowerCase();
+
+  const pw    = document.getElementById('reg-pw').value;
+
+  const pw2   = document.getElementById('reg-pw2').value;
+
+  if(!name)            { showAuthErr('Please enter your name.'); return; }
+
+  if(!validEmail(email)){ showAuthErr('Please enter a valid email address.'); return; }
+
+  if(pw.length < 8)   { showAuthErr('Password must be at least 8 characters.'); return; }
+
+  if(pw !== pw2)       { showAuthErr('Passwords do not match.'); return; }
+
+  const db = getUsers();
+
+  if(db[email])        { showAuthErr('An account with this email already exists. Please sign in.'); return; }
+
+  const btn = document.getElementById('registerBtn');
+
+  btn.textContent='Creating account…'; btn.disabled=true;
+
+  try{
+
+    const hash = await sha256(pw + email); // salt = email
+
+    db[email] = { name, hash, createdAt: Date.now() };
+
+    setUsers(db);
+
+    showAuthOk('? Account created! Signing you in…');
+
+    setTimeout(()=>{
+
+      createSession(email, name, false);
+
+      currentUser = { name, email, isGuest:false };
+
+      afterAuth();
+
+    }, 800);
+
+  }catch(e){
+
+    showAuthErr('Something went wrong. Please try again.');
+
+  } finally {
+
+    btn.textContent='Create Account ?'; btn.disabled=false;
+
+  }
+
+}
+
+// -- LOGIN --
+
+async function doLogin(){
+
+  clearAuthMsg();
+
+  const email    = document.getElementById('login-email').value.trim().toLowerCase();
+
+  const pw       = document.getElementById('login-pw').value;
+
+  const remember = document.getElementById('login-remember').checked;
+
+  if(!validEmail(email)){ showAuthErr('Please enter a valid email.'); return; }
+
+  if(!pw)                { showAuthErr('Please enter your password.'); return; }
+
+  // Brute-force check
+
+  if(isLockedOut(email)){
+
+    const rec=getFailRecord(email);
+
+    const mins=Math.ceil((LOCKOUT_MS-(Date.now()-rec.since))/60000);
+
+    showAuthErr(`Too many failed attempts. Account locked for ${mins} more minute(s).`);
+
+    return;
+
+  }
+
+  const btn = document.getElementById('loginBtn');
+
+  btn.textContent='Signing in…'; btn.disabled=true;
+
+  try{
+
+    const db = getUsers();
+
+    const user = db[email];
+
+    if(!user){ incFail(email); showAuthErr('No account found with this email.'); return; }
+
+    const hash = await sha256(pw + email);
+
+    if(hash !== user.hash){
+
+      const rec = incFail(email);
+
+      const left = MAX_FAILS - rec.count;
+
+      showAuthErr(left > 0
+
+        ? `Incorrect password. ${left} attempt(s) remaining.`
+
+        : 'Too many failed attempts. Account locked for 15 minutes.');
+
+      return;
+
+    }
+
+    // Success
+
+    clearFails(email);
+
+    createSession(email, user.name, remember);
+
+    currentUser = { name: user.name, email, isGuest:false };
+
+    afterAuth();
+
+  }catch(e){
+
+    showAuthErr('Login error. Please try again.');
+
+  } finally {
+
+    btn.textContent='Sign In ?'; btn.disabled=false;
+
+  }
+
+}
+
+// -- FORGOT PASSWORD --
+
+function doForgot(){
+
+  clearAuthMsg();
+
+  const email = document.getElementById('forgot-email').value.trim().toLowerCase();
+
+  if(!validEmail(email)){ showAuthErr('Please enter your registered email.'); return; }
+
+  const db = getUsers();
+
+  if(!db[email]){ showAuthErr('No account found with this email.'); return; }
+
+  // Since this is frontend-only, we reset to a known temp password
+
+  const tempPw = genToken(6); // 6-byte random hex
+
+  sha256(tempPw+email).then(h=>{
+
+    db[email].hash=h; setUsers(db);
+
+    showAuthOk(`? Temporary password: ${tempPw}\nCopy it, then sign in and change your name/country in Profile. (This is a demo — in production, this would be emailed.)`);
+
+  });
+
+}
+
+// -- GUEST --
+
+function continueAsGuest(){
+
+  currentUser = { name:'Guest', email:'', isGuest:true };
+
+  // Create a short guest session (1h)
+
+  SESSION = { token:genToken(), email:'guest', name:'Guest', expiresAt:Date.now()+60*60*1000, rememberMe:false };
+
+  localStorage.setItem(SESSION_KEY, JSON.stringify(SESSION));
+
+  startSessionWatchdog();
+
+  afterAuth();
+
+}
+
+// -- AFTER AUTH (shared) --
+
+function afterAuth(){
+
+  document.getElementById('authScreen').classList.add('hide');
+
+  if(load() && S.user.name){
+
+    if(!currentUser.isGuest && currentUser.name !== 'Guest'){
+
+      S.user.name = currentUser.name;
+
+      save();
+
+    }
+
+    document.getElementById('obModal').classList.add('hide');
+
+    document.getElementById('shell').style.display='flex';
+
+    document.getElementById('shell').style.flexDirection='column';
+
+    initApp();
+
+    toast('Welcome back, '+S.user.name+'! 🌍','ok');
+
+  } else {
+
+    if(!currentUser.isGuest){
+
+      const nameEl=document.getElementById('ob-name');
+
+      if(nameEl) nameEl.value=currentUser.name;
+
+    }
+
+    document.getElementById('obModal').classList.remove('hide');
+
+    calcObBaseline();
+
+  }
+
+}
+
+// -------------------------------------------
+
+// AI — Claude API (fixed) + Gemini fallback
+
+// -------------------------------------------
+
+const AI_SYS = "You are EcoSense, an expert carbon footprint analyst embedded in a tracking app. Be concise, data-driven, and specific to the user's actual numbers. No markdown, no asterisks, no bullet symbols. Write in warm, encouraging plain prose.";
+
+function buildContext(){
+
+  const today=todayStr();
+
+  const log=S.logs.find(l=>l.date===today);
+
+  const wk=S.logs.slice(0,7);
+
+  const wkAvg=wk.length?wk.reduce((a,l)=>a+l.total,0)/wk.length:0;
+
+  const country=COUNTRY[S.user.country]||COUNTRY.india;
+
+  return`User: ${S.user.name||'User'}, Country: ${(S.user.country||'india').toUpperCase()}, Baseline: ${S.user.baseline||4.6} kg/day
+
+Today (${today}): ${log?log.total.toFixed(2)+' kg CO2':'not logged yet'}
+
+Today breakdown — Transport: ${log?log.cats.t.toFixed(2):0}kg, Food: ${log?log.cats.f.toFixed(2):0}kg, Energy: ${log?log.cats.e.toFixed(2):0}kg, Shopping: ${log?log.cats.s.toFixed(2):0}kg
+
+Activities: ${log?log.activities.map(a=>a.id+'('+a.co2.toFixed(2)+'kg)').join(', '):'none logged'}
+
+Weekly avg: ${wkAvg.toFixed(2)} kg/day over ${wk.length} days logged
+
+Benchmarks — Country avg: ${country.daily} kg/day | India avg: 4.6 | Global avg: 13.5 | 1.5C target: 4.11 kg/day
+
+Carbon score: ${log?calcScore(log.total):'no data'}/100 | Points: ${S.points} | Streak: ${S.streak} days`.trim();
+
+}
+
+// -------------------------------------------
+
+// API KEY MANAGER
+
+// -------------------------------------------
+
+let KEYS = { claude:'', gemini:'' }; // loaded from localStorage
+
+function loadKeys(){
+
+  try{ const d=localStorage.getItem('eco3_keys'); if(d) KEYS={...KEYS,...JSON.parse(d)}; }catch(e){}
+
+}
+
+function saveKeys(){
+
+  try{ localStorage.setItem('eco3_keys', JSON.stringify(KEYS)); }catch(e){}
+
+}
+
+loadKeys();
+
+// Detect key type from prefix
+
+function detectKeyType(val){
+
+  const v = val.trim();
+
+  const icon = document.getElementById('apikeyInputIcon');
+
+  const badge = document.getElementById('apikeyTypeBadge');
+
+  const btn = document.getElementById('apikeySaveBtn');
+
+  const hint = document.getElementById('apikeyHint');
+
+  if(!v){ 
+
+    badge.style.display='none'; btn.disabled=true; icon.textContent='🔑';
+
+    hint.textContent="We never send your keys anywhere except the official AI provider endpoints.";
+
+    return null; 
+
+  }
+
+  let type = null;
+
+  if(v.startsWith('sk-ant-')){ type='claude'; }
+
+  else if(v.startsWith('AIza') || v.startsWith('AQ.') || v.startsWith('AQ-')){ type='gemini'; }
+
+  else if(v.length > 20){ type='gemini'; }
+
+  if(type==='claude'){
+
+    badge.textContent='Claude / Anthropic'; badge.className='apikey-type-badge claude';
+
+    badge.style.display='inline-block'; icon.textContent='🤖'; btn.disabled=false;
+
+    hint.innerHTML='? Detected: <strong>Claude (Anthropic)</strong> — starts with sk-ant-…';
+
+  } else if(type==='gemini'){
+
+    badge.textContent='Google Gemini'; badge.className='apikey-type-badge gemini';
+
+    badge.style.display='inline-block'; icon.textContent='🔷'; btn.disabled=false;
+
+    hint.innerHTML='? Detected: <strong>Google Gemini</strong> — click Validate &amp; Save to verify it with a live test request.';
+
+  } else if(type==='unknown'){
+
+    badge.textContent='Unknown format'; badge.className='apikey-type-badge unknown';
+
+    badge.style.display='inline-block'; icon.textContent='❓'; btn.disabled=true;
+
+    hint.innerHTML='⚠️ Key format not recognised. Claude keys start with <code>sk-ant-</code>. Gemini keys are usually 30+ characters — double check you copied the whole key.';
+
+  } else {
+
+    badge.style.display='none'; btn.disabled=true; icon.textContent='🔑';
+
+    hint.textContent="We never send your keys anywhere except the official AI provider endpoints.";
+
+  }
+
+  return type;
+
+}
+
+async function saveApiKey(){
+
+  const val = document.getElementById('apikeyInput').value.trim();
+
+  const type = detectKeyType(val);
+
+  if(!type || type==='unknown') return;
+
+  const hint = document.getElementById('apikeyHint');
+
+  const btn = document.getElementById('apikeySaveBtn');
+
+  btn.disabled=true; btn.textContent='Validating…';
+
+  hint.innerHTML='<div class="apikey-validating"><div class="spinner" style="width:12px;height:12px"></div> Sending a test request to verify key…</div>';
+
+  let valid = false;
+
+  let errMsg = '';
+
+  try{
+
+    if(type==='claude'){
+
+      const res = await fetch('https://api.anthropic.com/v1/messages',{
+
+        method:'POST',
+
+        headers:{
+
+          'Content-Type':'application/json',
+
+          'x-api-key': val,
+
+          'anthropic-version':'2023-06-01',
+
+          'anthropic-dangerous-direct-browser-access':'true'
+
+        },
+
+        body:JSON.stringify({
+
+          model:'claude-sonnet-4-6', max_tokens:2500,
+
+          messages:[{role:'user',content:'Hi'}]
+
+        })
+
+      });
+
+      if(res.ok){ valid=true; }
+
+      else{ const e=await res.json().catch(()=>({})); errMsg=e.error?.message||'Status '+res.status; }
+
+    } else if(type==='gemini'){
+
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${val}`,{
+
+        method:'POST',
+
+        headers:{'Content-Type':'application/json'},
+
+        body:JSON.stringify({contents:[{parts:[{text:'Hi'}]}],generationConfig:{maxOutputTokens:2500}})
+
+      });
+
+      if(res.ok){ valid=true; }
+
+      else{ const e=await res.json().catch(()=>({})); errMsg=e.error?.message||'Status '+res.status; }
+
+    }
+
+  }catch(e){ errMsg=e.message; }
+
+  btn.textContent='Validate & Save';
+
+  if(valid){
+
+    KEYS[type] = val;
+
+    saveKeys();
+
+    document.getElementById('apikeyInput').value='';
+
+    detectKeyType('');
+
+    hint.innerHTML='<div class="apikey-valid">? Key validated and saved! AI features are now active.</div>';
+
+    renderApiKeyStatus();
+
+    toast(type==='claude'?'? Claude API key saved!':'? Gemini API key saved!','ok');
+
+    btn.disabled=false;
+
+  } else {
+
+    hint.innerHTML=`<div class="apikey-invalid">? Invalid key — ${errMsg}. Please check and try again.</div>`;
+
+    btn.disabled=false;
+
+  }
+
+}
+
+function removeKey(type){
+
+  KEYS[type]='';
+
+  saveKeys();
+
+  renderApiKeyStatus();
+
+  toast((type==='claude'?'Claude':'Gemini')+' key removed.','');
+
+}
+
+function renderApiKeyStatus(){
+
+  const row = document.getElementById('apikeyStatusRow');
+
+  const list = document.getElementById('apikeyActiveList');
+
+  const pills = [];
+
+  const items = [];
+
+  if(KEYS.claude){
+
+    pills.push(`<div class="apikey-pill claude-pill" title="Click to remove" onclick="removeKey('claude')"><div class="pill-dot"></div>Claude ? ×</div>`);
+
+    const masked = 'sk-ant-…'+KEYS.claude.slice(-6);
+
+    items.push(`<div class="apikey-active-item">
+
+<span style="font-size:16px">🤖</span>
+
+<div class="apikey-active-name">Claude (Anthropic)</div>
+
+<div class="apikey-active-val">${masked}</div>
+
+<button class="apikey-remove" onclick="removeKey('claude')" title="Remove key">×</button>
+
+</div>`);
+
+  }
+
+  if(KEYS.gemini){
+
+    pills.push(`<div class="apikey-pill gemini-pill" title="Click to remove" onclick="removeKey('gemini')"><div class="pill-dot"></div>Gemini ? ×</div>`);
+
+    const masked = KEYS.gemini.slice(0,4)+'…'+KEYS.gemini.slice(-4);
+
+    items.push(`<div class="apikey-active-item">
+
+<span style="font-size:16px">🔷</span>
+
+<div class="apikey-active-name">Google Gemini</div>
+
+<div class="apikey-active-val">${masked}</div>
+
+<button class="apikey-remove" onclick="removeKey('gemini')" title="Remove key">×</button>
+
+</div>`);
+
+  }
+
+  row.innerHTML = pills.join('') || '<span class="xs text-m">No keys saved yet</span>';
+
+  if(items.length){ list.style.display='block'; list.innerHTML=items.join(''); }
+
+  else { list.style.display='none'; }
+
+}
+
+// Call on init
+
+document.addEventListener('DOMContentLoaded', renderApiKeyStatus);
+
+// -- Claude API (uses saved key) --
+
+async function callClaude(userPrompt, sysOverride=''){
+
+  if(!KEYS.claude) throw new Error('No Claude API key saved');
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+
+    method: 'POST',
+
+    headers: {
+
+      'Content-Type': 'application/json',
+
+      'x-api-key': KEYS.claude,
+
+      'anthropic-version': '2023-06-01',
+
+      'anthropic-dangerous-direct-browser-access': 'true'
+
+    },
+
+    body: JSON.stringify({
+
+      model: 'claude-sonnet-4-6',
+
+      max_tokens: 1000,
+
+      system: sysOverride || AI_SYS,
+
+      messages: [{ role:'user', content: userPrompt }]
+
+    })
+
+  });
+
+  if(!res.ok){
+
+    const err = await res.json().catch(()=>({}));
+
+    throw new Error(err.error?.message || 'Claude error '+res.status);
+
+  }
+
+  const data = await res.json();
+
+  const text = data.content?.find(b=>b.type==='text')?.text;
+
+  if(!text) throw new Error('No text in Claude response');
+
+  return text;
+
+}
+
+// -- Gemini API (uses saved key) --
+
+async function callGemini(userPrompt){
+
+  if(!KEYS.gemini) throw new Error('No Gemini API key saved');
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${KEYS.gemini}`;
+
+  const body = {
+
+    contents:[{parts:[{text: AI_SYS + '\n\n' + userPrompt}]}],
+
+    generationConfig:{ maxOutputTokens:2500, temperature:0.7 }
+
+  };
+
+  const res = await fetch(url,{
+
+    method:'POST',
+
+    headers:{'Content-Type':'application/json'},
+
+    body:JSON.stringify(body)
+
+  });
+
+  if(!res.ok){ const e=await res.json().catch(()=>({})); throw new Error(e.error?.message||'Gemini error '+res.status); }
+
+  const data = await res.json();
+
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+  if(!text) throw new Error('No text in Gemini response');
+
+  return text.replace(/\*\*?([^*]+)\*\*?/g,'$1').replace(/#{1,6}\s/g,'').replace(/^\s*[-•]\s+/gm,'').trim();
+
+}
+
+// -- Smart AI caller: Claude first ? Gemini fallback ? helpful error --
+
+async function smartAI(prompt, statusEl, badgeEl){
+
+  const hasC = !!KEYS.claude;
+
+  const hasG = !!KEYS.gemini;
+
+  // Neither key saved
+
+  if(!hasC && !hasG){
+
+    throw new Error('No AI key saved. Add a Claude or Gemini API key in the box above to enable AI features.');
+
+  }
+
+  // Try Claude first if available
+
+  if(hasC){
+
+    try{
+
+      const text = await callClaude(prompt);
+
+      if(badgeEl) badgeEl.textContent = 'Claude AI';
+
+      return { text, source:'Claude AI' };
+
+    } catch(e){
+
+      console.warn('Claude failed:', e.message);
+
+      if(!hasG) throw new Error('Claude key failed: '+e.message+'. Add a Gemini key as backup.');
+
+      if(statusEl) statusEl.textContent = 'Claude unavailable, switching to Gemini…';
+
+    }
+
+  }
+
+  // Gemini fallback (or primary if no Claude key)
+
+  try{
+
+    const text = await callGemini(prompt);
+
+    if(badgeEl) badgeEl.textContent = 'Gemini AI';
+
+    return { text, source:'Gemini AI' };
+
+  } catch(e){
+
+    throw new Error('Gemini failed: '+e.message);
+
+  }
+
+}
+
+async function runInsight(type){
+
+  const out=document.getElementById('insightOut');
+
+  const status=document.getElementById('insightStatus');
+
+  const ctx=buildContext();
+
+  const prompts={
+
+    daily:`${ctx}\n\nAnalyse this person's carbon footprint for today specifically. Give a 3-4 sentence personalised assessment: what they did well, their single biggest emission source with exact kg, and one specific actionable change for tomorrow.`,
+
+    weekly:`${ctx}\n\nAnalyse their weekly carbon pattern. Name the top 2 emission drivers with exact numbers, compare to their country average, and give the single highest-impact change they can make this week. Under 120 words.`,
+
+    plan:`${ctx}\n\nCreate a personalised 7-day carbon reduction action plan based on their actual data. For each day write: Day N: [specific action] (saves approx X kg). Keep each line concise and actionable.`,
+
+    forecast:`${ctx}\n\nBased on their current weekly average, forecast their annual CO2 and compare to the 1.5C climate target of 1.5 tonnes per year. Calculate exactly how much they need to cut per day to hit the target. Be realistic and motivating.`
+
+  };
+
+  out.innerHTML='<div class="ai-loading"><div class="spinner"></div> Analysing your data…</div>';
+
+  status.innerHTML='<span class="spinner" style="width:11px;height:11px;display:inline-block"></span> Running…';
+
+  try{
+
+    const badge = document.createElement('div');
+
+    badge.className='ai-badge';badge.textContent='AI';
+
+    const {text,source} = await smartAI(prompts[type], status, badge);
+
+    out.innerHTML='';
+
+    badge.textContent=source;
+
+    out.appendChild(badge);
+
+    out.appendChild(document.createElement('br'));
+
+    out.appendChild(document.createTextNode(text));
+
+    status.textContent='? Complete via '+source;
+
+  }catch(e){
+
+    out.innerHTML='<div class="ai-badge">Error</div><br>'+e.message;
+
+    status.textContent='Failed';
+
+  }
+
+}
+
+async function genReport(){
+
+  const out=document.getElementById('reportOut');
+
+  const btn=document.getElementById('copyReportBtn');
+
+  const ctx=buildContext();
+
+  out.style.display='block';
+
+  out.textContent='? Generating your weekly report…';
+
+  btn.style.display='none';
+
+  try{
+
+    const prompt=`${ctx}\n\nWrite a concise weekly carbon footprint report I can use as a blog post submission. Include: My week in numbers, Key findings, What I am doing well, Top 3 areas to improve, My commitment for next week. Write in first person, conversational tone, around 200 words. Plain text only.`;
+
+    const {text,source}=await smartAI(prompt,null,null);
+
+    out.textContent=text;
+
+    btn.style.display='inline-flex';
+
+    btn.textContent='📋 Copy Report (via '+source+')';
+
+  }catch(e){
+
+    out.textContent='Could not generate report: '+e.message;
+
+  }
+
+}
+
+function copyReport(){
+
+  const text=document.getElementById('reportOut').textContent;
+
+  navigator.clipboard.writeText(text).then(()=>toast('Report copied! ?','ok'));
+
+}
+
+async function quickTip(){
+
+  const el=document.getElementById('tipBox');
+
+  el.innerHTML='<div class="ai-loading"><div class="spinner"></div> Getting your personalised tip…</div>';
+
+  const ctx=buildContext();
+
+  const prompt=`${ctx}\n\nGive ONE specific, actionable carbon reduction tip in exactly 2 sentences. Focus on their highest emission category today. Make it concrete and practical for someone in India.`;
+
+  try{
+
+    const {text,source}=await smartAI(prompt,null,null);
+
+    el.innerHTML=`<div class="ai-badge">${source}</div><br>${text}`;
+
+  }catch(e){
+
+    el.innerHTML='<div class="ai-badge">Tip</div><br>Try replacing one meat meal today with a dal or sabzi — food accounts for up to 25% of most people\'s carbon footprint and a single vegetarian meal saves around 1.5 to 2 kg of CO2.';
+
+  }
+
+}
+
+let chatHistory=[];
+
+async function sendChat(){
+
+  const inp=document.getElementById('chatIn');
+
+  const msg=inp.value.trim();if(!msg)return;
+
+  inp.value='';
+
+  appendChat(msg,'user');
+
+  chatHistory.push({role:'user',content:msg});
+
+  const typing=appendChat('Thinking…','ai');
+
+  const ctx=buildContext();
+
+  const sysMsg=`You are EcoSense AI assistant. User context: ${ctx}. Keep replies under 90 words. Be specific, practical, encouraging. Plain text, no markdown.`;
+
+  try{
+
+    if(!KEYS.claude && !KEYS.gemini) throw new Error('no-key');
+
+    let reply='';
+
+    if(KEYS.claude){
+
+      // Claude with full conversation history
+
+      const res=await fetch('https://api.anthropic.com/v1/messages',{
+
+        method:'POST',
+
+        headers:{
+
+          'Content-Type':'application/json',
+
+          'x-api-key': KEYS.claude,
+
+          'anthropic-version':'2023-06-01',
+
+          'anthropic-dangerous-direct-browser-access':'true'
+
+        },
+
+        body:JSON.stringify({
+
+          model:'claude-sonnet-4-6', max_tokens:1000,
+
+          system:sysMsg, messages:chatHistory
+
+        })
+
+      });
+
+      if(!res.ok) throw new Error('claude-fail');
+
+      const data=await res.json();
+
+      reply=data.content?.find(b=>b.type==='text')?.text||'';
+
+    }
+
+    if(!reply && KEYS.gemini){
+
+      // Gemini fallback for chat
+
+      const fullPrompt=sysMsg+'\n\nConversation:\n'+chatHistory.map(m=>m.role.toUpperCase()+': '+m.content).join('\n')+'\n\nReply to the last user message in under 90 words.';
+
+      reply=await callGemini(fullPrompt);
+
+    }
+
+    if(!reply) throw new Error('no-reply');
+
+    typing.textContent=reply;
+
+    chatHistory.push({role:'assistant',content:reply});
+
+  }catch(e){
+
+    if(e.message==='no-key'){
+
+      typing.textContent='🔑 No AI key saved. Add a Claude or Gemini API key in the Dashboard to enable chat.';
+
+    } else {
+
+      typing.textContent='Could not get a response right now. Please try again.';
+
+    }
+
+  }
+
+  if(chatHistory.length>20)chatHistory=chatHistory.slice(-20);
+
+}
+
+function appendChat(text,role){
+
+  const msgs=document.getElementById('chatMsgs');
+
+  const el=document.createElement('div');
+
+  el.className='cmsg '+role;el.textContent=text;
+
+  msgs.appendChild(el);msgs.scrollTop=msgs.scrollHeight;return el;
+
+}
+
+// -------------------------------------------
+
+// TOAST
+
+// -------------------------------------------
+
+function toast(msg,type){
+
+  const c=document.getElementById('toasts');
+
+  const el=document.createElement('div');
+
+  el.className='toast '+(type||'');
+
+  el.textContent=(type==='ok'?'✅ ':type==='err'?'❌ ':'ℹ️ ')+msg;
+
+  c.appendChild(el);
+
+  setTimeout(()=>el.remove(),3500);
+
+}
+
+// -------------------------------------------
+
+// CONFIRM MODAL (fixes signOut + resetAll)
+
+// -------------------------------------------
+
+let _confirmAction = null;
+
+function showConfirmModal(title, body, okLabel, action, danger=false){
+
+  _confirmAction = action;
+
+  document.getElementById('confirmTitle').textContent = title;
+
+  document.getElementById('confirmBody').textContent = body;
+
+  const btn = document.getElementById('confirmOkBtn');
+
+  btn.textContent = okLabel;
+
+  btn.style.background = danger ? 'var(--r1)' : 'linear-gradient(135deg,var(--g1),var(--t1))';
+
+  document.getElementById('confirmOverlay').style.display = 'flex';
+
+}
+
+function closeConfirmModal(){
+
+  document.getElementById('confirmOverlay').style.display = 'none';
+
+  _confirmAction = null;
+
+}
+
+function runConfirmAction(){
+
+  const action = _confirmAction;
+
+  closeConfirmModal();
+
+  if(action) action();
+
+}
+
+// -------------------------------------------
+
+// GUEST ? LOGIN UPGRADE MODAL
+
+// -------------------------------------------
+
+function showGuestLoginModal(){
+
+  // Hide app shell temporarily and show auth screen
+
+  document.getElementById('authScreen').classList.remove('hide');
+
+  document.getElementById('authScreen').style.zIndex = '9998';
+
+  // Add a back button
+
+  const existing = document.getElementById('guestBackBtn');
+
+  if(!existing){
+
+    const backBtn = document.createElement('button');
+
+    backBtn.id = 'guestBackBtn';
+
+    backBtn.className = 'btn btn-g btn-sm';
+
+    backBtn.textContent = '? Back to App';
+
+    backBtn.style.cssText = 'position:absolute;top:16px;left:16px;z-index:9999';
+
+    backBtn.onclick = hideGuestLoginModal;
+
+    document.getElementById('authScreen').appendChild(backBtn);
+
+  }
+
+  switchAuthTab('login');
+
+  clearAuthMsg();
+
+}
+
+function hideGuestLoginModal(){
+
+  document.getElementById('authScreen').classList.add('hide');
+
+  const b = document.getElementById('guestBackBtn');
+
+  if(b) b.remove();
+
+}
+
+// -------------------------------------------
+
+// TOPBAR: show/hide guest login button
+
+// -------------------------------------------
+
+function updateGuestUI(){
+
+  const gBtn = document.getElementById('guestLoginBtn');
+
+  const av = document.getElementById('topbarAvatar');
+
+  if(!gBtn || !av) return;
+
+  if(currentUser.isGuest){
+
+    gBtn.style.display = 'block';
+
+    av.style.display = 'none';
+
+  } else {
+
+    gBtn.style.display = 'none';
+
+    av.style.display = 'block';
+
+    const initials = (S.user.name||'G').slice(0,1).toUpperCase();
+
+    av.innerHTML = `<div onclick="goTab('prof')" title="Signed in as ${currentUser.email}" style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--g1),var(--t1));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;border:2px solid var(--g1);cursor:pointer">${initials}</div>`;
+
+  }
+
+}
+
+// -------------------------------------------
+
+// DARK / LIGHT MODE TOGGLE
+
+// -------------------------------------------
+
+let darkMode = true;
+
+function toggleDark(){
+
+  darkMode = !darkMode;
+
+  const btn = document.getElementById('darkModeBtn');
+
+  if(darkMode){
+
+    document.documentElement.style.setProperty('--bg','#070d09');
+
+    document.documentElement.style.setProperty('--bg2','#0b1410');
+
+    document.documentElement.style.setProperty('--s1','#142017');
+
+    document.documentElement.style.setProperty('--s2','#1a2b1e');
+
+    document.documentElement.style.setProperty('--tx','#e8f5eb');
+
+    document.documentElement.style.setProperty('--tx2','#a8c4ad');
+
+    document.documentElement.style.setProperty('--tx3','#6b8f72');
+
+    if(btn) btn.textContent = '☀️ Light Mode';
+
+  } else {
+
+    document.documentElement.style.setProperty('--bg','#f0f7f1');
+
+    document.documentElement.style.setProperty('--bg2','#e8f5eb');
+
+    document.documentElement.style.setProperty('--s1','#d4edda');
+
+    document.documentElement.style.setProperty('--s2','#c8e6cc');
+
+    document.documentElement.style.setProperty('--tx','#1a3320');
+
+    document.documentElement.style.setProperty('--tx2','#2d5237');
+
+    document.documentElement.style.setProperty('--tx3','#4a7a54');
+
+    if(btn) btn.textContent = '🌙 Dark Mode';
+
+  }
+
+  try{ localStorage.setItem('eco3_dark', darkMode?'1':'0'); }catch(e){}
+
+}
+
+// Restore dark mode pref on load
+
+(function(){ try{ const d=localStorage.getItem('eco3_dark'); if(d==='0') setTimeout(toggleDark,100); }catch(e){} })();
+
+// -------------------------------------------
+
+// OFFLINE DETECTION
+
+// -------------------------------------------
+
+function updateOnlineStatus(){
+
+  const dot = document.getElementById('offlineDot');
+
+  const lbl = document.getElementById('offlineLabel');
+
+  const banner = document.getElementById('offlineBanner');
+
+  const online = navigator.onLine;
+
+  if(dot) dot.style.background = online ? 'var(--g2)' : 'var(--r2)';
+
+  if(lbl) lbl.textContent = online ? 'Online' : 'Offline';
+
+  if(banner){ if(!online) banner.classList.add('on'); else banner.classList.remove('on'); }
+
+}
+
+window.addEventListener('online', updateOnlineStatus);
+
+window.addEventListener('offline', updateOnlineStatus);
+
+document.addEventListener('DOMContentLoaded', updateOnlineStatus);
+
+// -------------------------------------------
+
+// PHOTO / RECEIPT SCANNER
+
+// -------------------------------------------
+
+function triggerScan(){
+
+  document.getElementById('receiptInput').click();
+
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+
+  const inp = document.getElementById('scanFileInput');
+
+  if(inp) inp.addEventListener('change', handleReceiptFile);
+
+});
+
+async function handleReceiptFile(e){
+
+  const file = e.target.files[0];
+
+  if(!file) return;
+
+  if(!KEYS.claude && !KEYS.gemini){
+
+    toast('Add an API key in the Dashboard to use the scanner','err'); return;
+
+  }
+
+  const resultBox = document.getElementById('scanResult');
+  const resultText = document.getElementById('scanResultText');
+
+  // Show image preview immediately
+  if(file.type.startsWith('image/')){
+    const previewEl = document.getElementById('scanPreview');
+    if(previewEl){ previewEl.src = URL.createObjectURL(file); previewEl.classList.add('on'); }
+  }
+
+  resultBox.style.display = 'block';
+
+  resultText.innerHTML = '<div class="ai-loading"><div class="spinner"></div> Scanning document — reading numbers…</div>';
+
+  // Convert to base64
+  const b64 = await new Promise((res,rej)=>{
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+
+  // Normalise media_type — Claude only accepts these four
+  let mediaType = file.type;
+  if(mediaType==='image/jpg') mediaType='image/jpeg';
+  if(!['image/jpeg','image/png','image/gif','image/webp'].includes(mediaType)) mediaType='image/jpeg';
+
+  const isImage = file.type.startsWith('image/');
+
+  const SCAN_PROMPT = `You are a precise Indian carbon footprint calculator. Analyze this document image carefully.
+
+STEP 1 — IDENTIFY DOCUMENT TYPE:
+- ELECTRICITY BILL: Look for monthly units consumed (kWh), meter reading, DISCOM name, billing period
+- FUEL RECEIPT: Petrol pump slip — look for litres dispensed, fuel type, price/litre
+- LPG BILL: Cylinder booking — weight in kg (1 standard cylinder = 14.2 kg)
+- GROCERY RECEIPT: Food items with quantities/weights — categorise by meat/dairy/vegan
+- TRAVEL TICKET: Bus/train/flight — distance and mode
+- OTHER: Any other carbon-related consumption
+
+STEP 2 — EXTRACT EXACT NUMBERS from the image. Read carefully — do not guess.
+
+STEP 3 — CALCULATE CO2 using ONLY these verified India-specific factors:
+• Electricity (CEA 2023 India grid): 0.85 kg CO2 per kWh
+• Petrol: 2.31 kg CO2 per litre | Diesel: 2.68 kg CO2 per litre | CNG: 1.96 kg CO2 per kg
+• LPG cylinder (14.2 kg): 42.3 kg CO2 total | LPG per kg: 2.98 kg CO2
+• Beef/mutton per kg food: 27 kg CO2 | Chicken per kg: 6.9 kg CO2 | Fish per kg: 5.1 kg CO2
+• Dairy/milk per litre: 3.2 kg CO2 | Eggs per dozen: 1.6 kg CO2
+• Vegetables/grains/dal per kg: 2.0 kg CO2 | Packaged food per kg: 3.5 kg CO2
+• Car petrol: 0.21 kg CO2/km | Bus: 0.089 kg CO2/km | Train: 0.041 kg CO2/km
+
+CRITICAL RULES:
+- For electricity bills use UNITS (kWh) consumed, NOT the ? amount
+- If only ? shown for electricity, estimate: ? amount ÷ 8 = kWh
+- For fuel use LITRES, not the ? paid
+- Show the arithmetic for each item: "14.2 kg × 2.98 = 42.3 kg CO2"
+- Recalculate total_co2_kg as the exact sum of all item co2_kg values
+- If image is blurry or unreadable, say so in the error field
+
+Return ONLY this exact JSON structure — no text before or after, no markdown fences:
+{"type":"electricity|fuel|lpg|grocery|travel|other","items":[{"name":"exact item from receipt","quantity":0.0,"unit":"kWh|litre|kg|cylinder|km|item","co2_kg":0.0,"calculation":"e.g. 120 kWh × 0.85 = 102 kg"}],"total_co2_kg":0.0,"period":"daily|monthly|annual","summary":"What this bill covers and total CO2 impact","confidence":"high|medium|low","confidence_reason":"brief reason for confidence level"}`;
+
+  try{
+    let text = '';
+
+    if(KEYS.claude && isImage){
+
+      const res = await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':KEYS.claude,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+        body:JSON.stringify({
+          model:'claude-sonnet-4-6', max_tokens:2500,
+          system:'You are a precise carbon footprint calculator. Return ONLY valid JSON. Never add text outside the JSON object. Always verify arithmetic before returning.',
+          messages:[{role:'user',content:[
+            {type:'image',source:{type:'base64',media_type:mediaType,data:b64}},
+            {type:'text',text:SCAN_PROMPT}
+          ]}]
+        })
+      });
+      if(!res.ok){const err=await res.json().catch(()=>({}));throw new Error(err.error?.message||'Claude API error '+res.status);}
+      const d = await res.json();
+      text = d.content?.find(b=>b.type==='text')?.text||'';
+
+    } else if(KEYS.gemini && isImage){
+
+      // Gemini vision API
+      const url=`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${KEYS.gemini}`;
+      const res = await fetch(url,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          contents:[{parts:[
+            {inline_data:{mime_type:file.type,data:b64}},
+            {text:SCAN_PROMPT}
+          ]}],
+          generationConfig:{maxOutputTokens:2500,temperature:0.1}
+        })
+      });
+      if(!res.ok){const er=await res.json().catch(()=>({}));throw new Error(er.error?.message||'Gemini error '+res.status);}
+      const d=await res.json();
+      text=d.candidates?.[0]?.content?.parts?.[0]?.text||'';
+
+    } else {
+      throw new Error('Image scanning needs Claude or Gemini vision. Add a key in the Dashboard.');
+    }
+
+    // Robust JSON extraction — strip fences, find outermost { }
+    let clean = text.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+    const jS=clean.indexOf('{'); const jE=clean.lastIndexOf('}');
+    if(jS!==-1&&jE!==-1) clean=clean.slice(jS,jE+1);
+
+    let parsed;
+    try{ parsed=JSON.parse(clean); }
+    catch(je){
+      // Try auto-fix common AI JSON mistakes
+      clean=clean.replace(/,\s*\}/g,'}').replace(/,\s*\]/g,']').replace(/(['"])?([a-zA-Z_][a-zA-Z0-9_]*)(['"])?\s*:/g,'"$2":');
+      parsed=JSON.parse(clean);
+    }
+
+    if(parsed.error){
+      resultText.innerHTML=`<div style="color:var(--a2);font-weight:600">⚠️ ${parsed.error}</div>${parsed.suggestion?`<div class="xs text-m mt8">💡 ${parsed.suggestion}</div>`:'<div class="xs text-m mt8">Try a clearer photo with good lighting.</div>'}`;
+      return;
+    }
+
+    if(!Array.isArray(parsed.items)) throw new Error('Could not parse receipt structure. Try a clearer image.');
+
+    // Sanitise numbers
+    parsed.items=parsed.items.map(i=>({...i,co2_kg:Math.max(0,parseFloat(i.co2_kg)||0)}));
+    // Recalculate total from items (don't trust AI sum)
+    const calcTotal=parsed.items.reduce((s,i)=>s+i.co2_kg,0);
+    parsed.total_co2_kg=parseFloat(calcTotal.toFixed(3));
+
+    const confColor=parsed.confidence==='high'?'var(--g2)':parsed.confidence==='medium'?'var(--a2)':'var(--r2)';
+    const periodNote=parsed.period==='monthly'?' (monthly)':parsed.period==='annual'?' (annual)':'';
+
+    let html=`<div class="ai-badge">Scanned ?</div><br>`;
+    html+=`<div style="font-size:13px;font-weight:600;margin-bottom:10px;line-height:1.5;color:var(--tx)">${parsed.summary}</div>`;
+
+    html+=`<table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:10px">`;
+    html+=`<tr style="background:var(--s3)"><th style="text-align:left;padding:5px 8px;color:var(--tx3)">Item</th><th style="text-align:center;padding:5px 8px;color:var(--tx3)">Qty</th><th style="text-align:right;padding:5px 8px;color:var(--tx3)">CO2</th></tr>`;
+    parsed.items.forEach(item=>{
+      const c=item.co2_kg>10?'var(--r2)':item.co2_kg>3?'var(--a2)':'var(--g2)';
+      html+=`<tr title="${item.calculation||'Calculation: '+item.quantity+' '+item.unit+' × factor'}">
+<td style="padding:5px 8px;border-top:1px solid var(--b1);color:var(--tx)">${item.name}</td>
+<td style="padding:5px 8px;border-top:1px solid var(--b1);text-align:center;color:var(--tx3);font-family:var(--fm);font-size:11px">${item.quantity} ${item.unit}</td>
+<td style="padding:5px 8px;border-top:1px solid var(--b1);text-align:right;color:${c};font-family:var(--fm);font-weight:600">${item.co2_kg.toFixed(2)} kg</td>
+</tr>`;
+      if(item.calculation){
+        html+=`<tr><td colspan="3" style="padding:2px 8px 5px 8px;font-size:10px;color:var(--tx3);font-family:var(--fm);border-top:none">? ${item.calculation}</td></tr>`;
+      }
+    });
+    const totalColor=parsed.total_co2_kg>20?'var(--r2)':parsed.total_co2_kg>5?'var(--a2)':'var(--g2)';
+    html+=`<tr><td colspan="2" style="padding:7px 8px;border-top:2px solid var(--b2);font-weight:700;color:var(--tx)">TOTAL${periodNote}</td><td style="padding:7px 8px;border-top:2px solid var(--b2);text-align:right;color:${totalColor};font-family:var(--fm);font-weight:700;font-size:15px">${parsed.total_co2_kg.toFixed(2)} kg CO2</td></tr>`;
+    html+=`</table>`;
+
+    html+=`<div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;font-size:11px;color:${confColor}">
+<span style="width:7px;height:7px;border-radius:50%;background:${confColor};display:inline-block;flex-shrink:0"></span>
+<span>Confidence: <strong>${parsed.confidence}</strong>${parsed.confidence_reason?' — '+parsed.confidence_reason:''}</span>
+</div>`;
+
+    html+=`<button class="btn btn-p btn-sm" style="width:100%" onclick='applyScannedToLog(${JSON.stringify(parsed).replace(/"/g,"&quot;")})'>? Add ${parsed.total_co2_kg.toFixed(2)} kg CO2 to Today's Log</button>`;
+
+    resultText.innerHTML=html;
+
+  }catch(err){
+    resultText.innerHTML=`<div style="color:var(--r2);font-weight:600">? ${err.message}</div><div class="xs text-m mt8">Tips: use a clear, well-lit photo • ensure numbers are readable • try a different angle.</div>`;
+  }
+
+  e.target.value='';
+
+}
+
+function applyScannedToLog(parsed){
+
+  // Add scanned total directly to today's log as energy/shopping depending on type
+
+  const cat = parsed.type==='electricity'?'e': parsed.type==='fuel'?'t': parsed.type==='grocery'?'f':'s';
+
+  const today = todayStr();
+
+  let log = S.logs.find(l=>l.date===today);
+
+  if(!log){
+
+    log = {date:today,cats:{t:0,f:0,e:0,s:0},total:0,activities:[]};
+
+    S.logs.unshift(log);
+
+  }
+
+  log.cats[cat] += parsed.total_co2_kg;
+
+  log.total += parsed.total_co2_kg;
+
+  log.activities.push({id:'scan',co2:parsed.total_co2_kg,cat,name:'Scanned: '+parsed.type});
+
+  S.logs.sort((a,b)=>a.date<b.date?1:-1);
+
+  save(); updateDash(); goTab('dash');
+
+  toast('? Scanned data added to today\'s log!','ok');
+
+}
+
+// -------------------------------------------
+
+// VOICE INPUT LOGGING
+
+// -------------------------------------------
+
+let _voiceRecognition = null;
+
+let _voiceActive = false;
+
+let _voiceParsed = null;
+
+function toggleVoice(){
+
+  if(_voiceActive){ stopVoice(); return; }
+
+  if(!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)){
+
+    toast('Voice input not supported in this browser. Try Chrome.','err'); return;
+
+  }
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  _voiceRecognition = new SR();
+
+  _voiceRecognition.lang = 'en-IN';
+
+  _voiceRecognition.continuous = false;
+
+  _voiceRecognition.interimResults = true;
+
+  _voiceRecognition.onstart = ()=>{
+
+    _voiceActive = true;
+
+    document.getElementById('voiceBtn').classList.add('listening');
+
+    document.getElementById('voiceBtnLabel').textContent = 'Listening… speak now';
+
+    document.getElementById('voiceStatus').textContent = 'Speak clearly: "I drove 15 km to college and had chicken biryani for lunch"';
+
+    document.getElementById('voiceTranscript').textContent = '';
+
+    document.getElementById('voiceTranscript').classList.add('on');
+
+  };
+
+  _voiceRecognition.onresult = (e)=>{
+
+    const transcript = Array.from(e.results).map(r=>r[0].transcript).join('');
+
+    document.getElementById('voiceTranscript').textContent = '🎤 "'+transcript+'"';
+
+    if(e.results[0].isFinal) parseVoiceInput(transcript);
+
+  };
+
+  _voiceRecognition.onerror = (e)=>{
+
+    stopVoice();
+
+    toast('Voice error: '+e.error,'err');
+
+  };
+
+  _voiceRecognition.onend = stopVoice;
+
+  _voiceRecognition.start();
+
+}
+
+function stopVoice(){
+
+  _voiceActive = false;
+
+  if(_voiceRecognition) try{ _voiceRecognition.stop(); }catch(e){}
+
+  document.getElementById('voiceBtn').classList.remove('listening');
+
+  document.getElementById('voiceBtnLabel').textContent = 'Tap to start listening';
+
+  document.getElementById('voiceStatus').textContent = 'Speak naturally: "I took a bus for 15 km and had dal rice for lunch"';
+
+}
+
+async function parseVoiceInput(transcript){
+
+  if(!KEYS.claude && !KEYS.gemini){
+
+    document.getElementById('voiceResult').style.display='block';
+
+    document.getElementById('voiceResultText').textContent='🔑 Add an API key in Dashboard to use voice parsing.';
+
+    return;
+
+  }
+
+  const resultBox = document.getElementById('voiceResult');
+
+  const resultText = document.getElementById('voiceResultText');
+
+  resultBox.style.display='block';
+
+  resultText.textContent='Parsing your voice input…';
+
+  const prompt = `User said: "${transcript}"
+
+Extract carbon footprint activities from this statement. Return ONLY valid JSON:
+
+{
+
+"activities": [
+
+    {"id":"car|bike|bus|train|flight|meals|dairy|ac|geyser|elec|lpg|clothes|online|plastic","description":"what user did","value":0,"unit":"km|hours|servings|items","co2_kg":0.0}
+
+  ],
+
+"total_co2_kg": 0.0,
+
+"summary": "brief confirmation of what was extracted"
+
+}
+
+Emission factors: car=0.21kg/km, bike(scooter)=0.11kg/km, bus=0.089kg/km, train=0.041kg/km, veg meal=0.5kg, chicken=1.8kg, beef=6.8kg, AC=1.28kg/hr, electricity=0.85kg/kWh, LPG=0.22kg/hr cooking.
+
+If nothing carbon-related found, return {"activities":[],"total_co2_kg":0,"summary":"Nothing carbon-related found"}.`;
+
+  try{
+
+    const {text} = await smartAI(prompt, null, null);
+
+    const clean = text.replace(/```json|```/g,'').trim();
+
+    _voiceParsed = JSON.parse(clean);
+
+    resultText.innerHTML = `<strong>${_voiceParsed.summary}</strong><br><br>`+
+
+      _voiceParsed.activities.map(a=>`• ${a.description}: <span style="color:var(--g2);font-family:var(--fm)">${a.co2_kg.toFixed(2)} kg CO2</span>`).join('<br>')+
+
+      `<br><br><strong style="color:var(--g2)">Total: ${_voiceParsed.total_co2_kg.toFixed(2)} kg CO2</strong>`;
+
+    if(_voiceParsed.activities.length>0)
+
+      document.getElementById('voiceApplyBtn').style.display='block';
+
+  }catch(err){
+
+    resultText.textContent='Could not parse: '+err.message;
+
+  }
+
+}
+
+function applyVoiceToLog(){
+
+  if(!_voiceParsed) return;
+
+  const today = todayStr();
+
+  let log = S.logs.find(l=>l.date===today);
+
+  if(!log){ log={date:today,cats:{t:0,f:0,e:0,s:0},total:0,activities:[]}; S.logs.unshift(log); }
+
+  const catMap={car:'t',bike:'t',bus:'t',train:'t',flight:'t',meals:'f',dairy:'f',ac:'e',geyser:'e',elec:'e',lpg:'e',clothes:'s',online:'s',plastic:'s'};
+
+  _voiceParsed.activities.forEach(a=>{
+
+    const cat = catMap[a.id]||'t';
+
+    log.cats[cat]+=a.co2_kg; log.total+=a.co2_kg;
+
+    log.activities.push({id:a.id,co2:a.co2_kg,cat,name:a.description});
+
+  });
+
+  S.logs.sort((a,b)=>a.date<b.date?1:-1);
+
+  save(); updateDash(); goTab('dash');
+
+  toast('? Voice log added to today\'s activities!','ok');
+
+  _voiceParsed=null;
+
+  document.getElementById('voiceApplyBtn').style.display='none';
+
+}
+
+// -------------------------------------------
+
+// SHAREABLE CARBON CARD
+
+// -------------------------------------------
+
+function genShareCard(){
+
+  const today = todayStr();
+
+  const log = S.logs.find(l=>l.date===today);
+
+  const co2 = log ? log.total : (S.logs[0]?.total||0);
+
+  const score = calcScore(co2);
+
+  const {grade} = getGrade(score);
+
+  const country = COUNTRY[S.user.country]||COUNTRY.india;
+
+  const diff = ((co2-country.daily)/country.daily*100).toFixed(0);
+
+  const better = co2 < country.daily;
+
+  const canvas = document.getElementById('shareCanvas');
+
+  const ctx = canvas.getContext('2d');
+
+  canvas.width = 600; canvas.height = 340;
+
+  // Background
+
+  const bg = ctx.createLinearGradient(0,0,600,340);
+
+  bg.addColorStop(0,'#070d09'); bg.addColorStop(1,'#0f2417');
+
+  ctx.fillStyle = bg; ctx.fillRect(0,0,600,340);
+
+  // Green glow
+
+  const glow = ctx.createRadialGradient(120,160,0,120,160,200);
+
+  glow.addColorStop(0,'rgba(29,185,84,0.15)'); glow.addColorStop(1,'transparent');
+
+  ctx.fillStyle = glow; ctx.fillRect(0,0,600,340);
+
+  // Border
+
+  ctx.strokeStyle='rgba(29,185,84,0.3)'; ctx.lineWidth=1.5;
+
+  roundRect(ctx,10,10,580,320,14); ctx.stroke();
+
+  // Logo
+
+  ctx.fillStyle='#1db954'; ctx.font='bold 18px sans-serif'; ctx.fillText('🌿 EcoSense',24,44);
+
+  // Big CO2 number
+
+  ctx.fillStyle='#e8f5eb'; ctx.font='bold 72px sans-serif'; ctx.textAlign='center';
+
+  ctx.fillText(co2.toFixed(1),300,140);
+
+  ctx.fillStyle='#6b8f72'; ctx.font='20px sans-serif';
+
+  ctx.fillText('kg CO2 today',300,170);
+
+  // Score
+
+  ctx.fillStyle='#1db954'; ctx.font='bold 22px sans-serif';
+
+  ctx.fillText('Score: '+score+'/100 • '+grade.replace(/[^\w\s]/g,'').trim(),300,210);
+
+  // Comparison
+
+  ctx.fillStyle = better?'#1db954':'#ef4444'; ctx.font='16px sans-serif';
+
+  ctx.fillText((better?'? ':'? ')+Math.abs(diff)+'% vs '+country.lbl,300,245);
+
+  // Date & name
+
+  ctx.fillStyle='#4a7a54'; ctx.font='14px sans-serif';
+
+  ctx.fillText(S.user.name+' • '+today,300,285);
+
+  // Hashtag
+
+  ctx.fillStyle='rgba(29,185,84,0.5)'; ctx.font='13px sans-serif';
+
+  ctx.fillText('#EcoSense #CarbonFootprint #ClimateAction',300,310);
+
+  ctx.textAlign='left';
+
+  // Show & download
+
+  const url = canvas.toDataURL('image/png');
+
+  const preview = document.getElementById('shareCardPreview');
+
+  preview.innerHTML = `<img src="${url}" style="width:100%;border-radius:10px;margin-bottom:10px"/>
+
+<div style="display:flex;gap:8px">
+
+<a href="${url}" download="ecosense-card.png" class="btn btn-p btn-sm" style="flex:1;justify-content:center">⬇️ Download Card</a>
+
+<button class="btn btn-g btn-sm" onclick="copyShareText()">📋 Copy Text</button>
+
+</div>`;
+
+  preview.style.display='block';
+
+  toast('Card generated! Download and share 🌍','ok');
+
+}
+
+function copyShareText(){
+
+  const today=todayStr();
+
+  const log=S.logs.find(l=>l.date===today);
+
+  const co2=log?log.total.toFixed(1):'—';
+
+  const score=log?calcScore(log.total):'—';
+
+  const text=`My carbon footprint today: ${co2} kg CO2\nCarbon Score: ${score}/100\nTracked with EcoSense 🌿\n#EcoSense #CarbonFootprint #ClimateAction`;
+
+  navigator.clipboard.writeText(text).then(()=>toast('Text copied!','ok'));
+
+}
+
+function roundRect(ctx,x,y,w,h,r){
+
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);
+
+  ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);ctx.lineTo(x+r,y+h);
+
+  ctx.arcTo(x,y+h,x,y+h-r,r);ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();
+
+}
+
+// -------------------------------------------
+
+// AI DEBATE MODE
+
+// -------------------------------------------
+
+async function runDebate(){
+
+  const claim = document.getElementById('debateQ').value.trim();
+
+  if(!claim){ toast('Enter a claim to debate','err'); return; }
+
+  const res = document.getElementById('debateResult');
+
+  const aiReply = document.getElementById('debateAIReply');
+
+  const userClaim = document.getElementById('debateUserClaim');
+
+  res.style.display='block';
+
+  userClaim.textContent = claim;
+
+  aiReply.textContent = 'Preparing counter-argument with real data…';
+
+  const prompt=`A person claims: "${claim}"
+
+Respond as EcoSense AI — a climate scientist. Respectfully but firmly counter this claim using real data and scientific facts relevant to India. Include specific numbers and studies. Be persuasive but kind. 3-4 sentences max. Plain text only.`;
+
+  try{
+
+    const {text}=await smartAI(prompt,null,null);
+
+    aiReply.textContent=text;
+
+  }catch(e){
+
+    aiReply.textContent='Add an API key in Dashboard to enable AI Debate mode.';
+
+  }
+
+}
+
+// -------------------------------------------
+
+// GOALS PAGE
+
+// -------------------------------------------
+
+let GOALS = [];
+
+function loadGoals(){ try{ GOALS=JSON.parse(localStorage.getItem('eco3_goals')||'[]'); }catch(e){ GOALS=[]; } }
+
+function saveGoals(){ try{ localStorage.setItem('eco3_goals',JSON.stringify(GOALS)); }catch(e){} }
+
+loadGoals();
+
+function renderGoals(){
+
+  const today = todayStr();
+
+  const wk = S.logs.slice(0,7);
+
+  const wkAvg = wk.length?wk.reduce((a,l)=>a+l.total,0)/wk.length:S.user.baseline;
+
+  const todayLog = S.logs.find(l=>l.date===today);
+
+  const todayCo2 = todayLog?todayLog.total:0;
+
+  const container = document.getElementById('goalsList');
+
+  if(!container) return;
+
+  if(!GOALS.length){
+
+    container.innerHTML=`<div class="card" style="text-align:center;padding:28px">
+
+<div style="font-size:36px;margin-bottom:10px">🎯</div>
+
+<div class="sm text-m">No goals yet — add one below!</div>
+
+</div>`;
+
+  } else {
+
+    container.innerHTML = GOALS.map((g,i)=>{
+
+      const current = g.period==='daily'?todayCo2:wkAvg*7;
+
+      const pct = Math.min(100, Math.max(0, g.type==='reduce'
+
+        ? ((g.baseline-current)/g.baseline*100)
+
+        : (current/g.target*100)));
+
+      const achieved = g.type==='reduce'?current<=g.target:current>=g.target;
+
+      return`<div class="card${achieved?' lit':''}">
+
+<div class="flex aic jb mb8">
+
+<div style="font-size:13px;font-weight:600">${g.emoji} ${g.name}</div>
+
+<div style="display:flex;gap:6px;align-items:center">
+
+            ${achieved?'<span class="badge b-g">? Achieved!</span>':''}
+
+<button class="btn btn-g btn-sm" style="padding:3px 8px;font-size:11px" onclick="removeGoal(${i})">?</button>
+
+</div>
+
+</div>
+
+<div class="xs text-m mb8">${g.period==='daily'?'Daily':'Weekly'} • Target: ${g.target} kg CO2</div>
+
+<div style="height:6px;background:var(--s3);border-radius:3px;overflow:hidden;margin-bottom:6px">
+
+<div style="height:100%;width:${pct}%;background:${achieved?'var(--g2)':'linear-gradient(90deg,var(--g2),var(--t2))'};border-radius:3px;transition:width .6s"></div>
+
+</div>
+
+<div class="xs text-m">${pct.toFixed(0)}% towards goal • Current: ${current.toFixed(2)} kg</div>
+
+</div>`;
+
+    }).join('');
+
+  }
+
+}
+
+function addGoal(){
+
+  const name = document.getElementById('goalName').value.trim();
+
+  const target = parseFloat(document.getElementById('goalTarget').value);
+
+  const period = document.getElementById('goalPeriod').value;
+
+  const emoji = document.getElementById('goalEmoji').value||'🎯';
+
+  if(!name||isNaN(target)||target<=0){ toast('Fill in all goal fields','err'); return; }
+
+  const wk=S.logs.slice(0,7);
+
+  const baseline=wk.length?wk.reduce((a,l)=>a+l.total,0)/wk.length*( period==='weekly'?7:1):S.user.baseline;
+
+  GOALS.push({name,target,period,emoji,type:'reduce',baseline,createdAt:todayStr()});
+
+  saveGoals(); renderGoals();
+
+  document.getElementById('goalName').value='';
+
+  document.getElementById('goalTarget').value='';
+
+  toast('Goal added! 🎯','ok');
+
+}
+
+function removeGoal(i){
+
+  GOALS.splice(i,1); saveGoals(); renderGoals();
+
+  toast('Goal removed','');
+
+}
+
+// -------------------------------------------
+
+// TOOLS PAGE RENDER
+
+// -------------------------------------------
+
+function renderTools(){
+
+  updateOnlineStatus();
+
+  renderApiKeyStatus();
+
+  renderShareCard();
+
+}
+
+function renderShareCard(){
+
+  const today = todayStr();
+
+  const log = S.logs.find(l=>l.date===today);
+
+  const co2 = log ? log.total : (S.logs[0]?.total||0);
+
+  const score = calcScore(co2);
+
+  const {grade} = getGrade(score);
+
+  const scoreBig = document.getElementById('shareScoreBig');
+
+  const gradeText = document.getElementById('shareGradeText');
+
+  const catRow = document.getElementById('shareCatRow');
+
+  if(scoreBig) scoreBig.textContent = co2 > 0 ? co2.toFixed(1) : '—';
+
+  if(gradeText) gradeText.textContent = co2 > 0 ? grade + ' • Score ' + score + '/100' : 'Log activities to see your score';
+
+  if(catRow){
+
+    const catLabels = {t:'🚗 Transport',f:'🍽️ Food',e:'⚡ Energy',s:'🛍️ Shopping'};
+
+    const src = log ? log.cats : {t:0,f:0,e:0,s:0};
+
+    catRow.innerHTML = Object.entries(src).filter(([,v])=>v>0)
+
+      .map(([k,v])=>`<span>${catLabels[k]||k} ${v.toFixed(1)}kg</span>`).join('');
+
+  }
+
+}
+
+// -------------------------------------------
+
+// PDF EXPORT
+
+// -------------------------------------------
+
+async function exportPDF(){
+
+  const btn = document.getElementById('pdfBtn');
+
+  if(btn){ btn.disabled=true; btn.textContent='Generating…'; }
+
+  const wk = S.logs.slice(0,7);
+
+  const wkAvg = wk.length?wk.reduce((a,l)=>a+l.total,0)/wk.length:0;
+
+  const country = COUNTRY[S.user.country]||COUNTRY.india;
+
+  let aiSummary = 'AI analysis unavailable — add an API key to get personalised insights.';
+
+  try{
+
+    const {text} = await smartAI(buildContext()+'\n\nWrite a 3-sentence carbon footprint summary for this person\'s weekly PDF report. Plain text only.', null, null);
+
+    aiSummary = text;
+
+  }catch(e){}
+
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"/>
+
+<style>
+
+  body{font-family:Arial,sans-serif;max-width:700px;margin:0 auto;padding:40px;color:#1a3320}
+
+  h1{color:#1db954;font-size:28px;margin-bottom:4px}
+
+  h2{color:#2d6a3f;font-size:16px;border-bottom:2px solid #1db954;padding-bottom:6px;margin-top:28px}
+
+  .stat{display:inline-block;background:#e8f5eb;border-radius:8px;padding:12px 20px;margin:6px;text-align:center}
+
+  .stat-val{font-size:26px;font-weight:700;color:#1db954}
+
+  .stat-lbl{font-size:11px;color:#4a7a54;margin-top:2px}
+
+  table{width:100%;border-collapse:collapse;margin-top:10px}
+
+  th{background:#e8f5eb;padding:8px;text-align:left;font-size:12px;color:#4a7a54}
+
+  td{padding:8px;border-bottom:1px solid #e0f0e3;font-size:13px}
+
+  .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;background:#e8f5eb;color:#1db954}
+
+  .footer{margin-top:40px;text-align:center;font-size:11px;color:#6b8f72}
+
+</style></head><body>
+
+<h1>🌿 EcoSense Weekly Carbon Report</h1>
+
+<p style="color:#4a7a54;font-size:13px">User: <strong>${S.user.name}</strong> • Generated: ${todayStr()} • Region: ${country.lbl}</p>
+
+<h2>This Week at a Glance</h2>
+
+<div>
+
+<div class="stat"><div class="stat-val">${wkAvg.toFixed(2)}</div><div class="stat-lbl">Avg kg CO2/day</div></div>
+
+<div class="stat"><div class="stat-val">${wk.reduce((a,l)=>a+l.total,0).toFixed(1)}</div><div class="stat-lbl">Total kg this week</div></div>
+
+<div class="stat"><div class="stat-val">${S.streak}</div><div class="stat-lbl">Day streak 🔥</div></div>
+
+<div class="stat"><div class="stat-val">${S.points}</div><div class="stat-lbl">Eco points 🌿</div></div>
+
+</div>
+
+<h2>AI Analysis</h2>
+
+<p style="font-size:13px;line-height:1.7;background:#e8f5eb;padding:14px;border-radius:8px">${aiSummary}</p>
+
+<h2>Daily Log (Last 7 Days)</h2>
+
+<table>
+
+<tr><th>Date</th><th>CO2 (kg)</th><th>Score</th><th>Transport</th><th>Food</th><th>Energy</th><th>Shopping</th></tr>
+
+  ${wk.map(l=>`<tr><td>${l.date}</td><td><strong>${l.total.toFixed(2)}</strong></td><td><span class="badge">${calcScore(l.total)}</span></td><td>${l.cats.t.toFixed(2)}</td><td>${l.cats.f.toFixed(2)}</td><td>${l.cats.e.toFixed(2)}</td><td>${l.cats.s.toFixed(2)}</td></tr>`).join('')}
+
+</table>
+
+<h2>Comparison</h2>
+
+<p style="font-size:13px">Your average: <strong>${wkAvg.toFixed(2)} kg/day</strong> vs ${country.lbl}: <strong>${country.daily} kg/day</strong> vs Global avg: <strong>13.5 kg/day</strong></p>
+
+<p style="font-size:13px">Annual estimate: <strong>${(wkAvg*365/1000).toFixed(2)} tonnes CO2</strong> • 1.5°C target: <strong>1.5 tonnes/year</strong></p>
+
+<div class="footer">Generated by EcoSense • Carbon Intelligence Platform • #EcoSense</div>
+
+</body></html>`;
+
+  const blob = new Blob([html],{type:'text/html'});
+
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+
+  a.href=url; a.download='EcoSense_Report_'+todayStr()+'.html';
+
+  a.click(); URL.revokeObjectURL(url);
+
+  if(btn){ btn.disabled=false; btn.textContent='📄 Export as PDF/HTML'; }
+
+  toast('Report downloaded! Open in browser and print as PDF 📄','ok');
+
+}
+
+// -------------------------------------------
+
+// CARBON OFFSET LINKS
+
+// -------------------------------------------
+
+function renderOffsetLinks(){
+
+  const container = document.getElementById('offsetLinks');
+
+  if(!container) return;
+
+  const wk=S.logs.slice(0,7);
+
+  const wkTotal=wk.reduce((a,l)=>a+l.total,0);
+
+  const trees=Math.ceil(wkTotal/22);
+
+  document.getElementById('offsetTreeCount').textContent=trees;
+
+  const links=[
+
+    {icon:'🌳',name:'SankalpTaru (India)',desc:'Plant trees across India • Gold Standard certified',price:'?99 per tree',url:'https://sankalptaru.org'},
+
+    {icon:'🌿',name:'Green Yatra',desc:'Mangrove plantation & clean India campaigns',price:'?50–200',url:'https://greenyatra.org'},
+
+    {icon:'☀️',name:'Climate Partner India',desc:'Solar & clean cookstove offset projects',price:'?150 per offset',url:'https://www.climatepartner.com'},
+
+    {icon:'🌲',name:'Carbon Watch India',desc:'Forest conservation in Northeast India',price:'?200 per tonne',url:'https://carbonnwatch.in'},
+
+  ];
+
+  container.innerHTML = links.map(l=>`
+
+<a href="${l.url}" target="_blank" rel="noopener" class="offset-link">
+
+<div class="offset-link-icon">${l.icon}</div>
+
+<div class="offset-link-body">
+
+<div class="offset-link-name">${l.name}</div>
+
+<div class="offset-link-desc">${l.desc}</div>
+
+</div>
+
+<div class="offset-link-price">${l.price}</div>
+
+</a>`).join('');
+
+}
+
+// -------------------------------------------
+
+// ONBOARDING TUTORIAL
+
+// -------------------------------------------
+
+const TUTORIAL_STEPS=[
+
+  {target:'t-log',title:'Log Your Activities',text:'Start here every day — enter what you did and we calculate your CO2 impact automatically.',pos:'bottom'},
+
+  {target:'t-ai',title:'AI Insights',text:'Get personalised analysis and tips from Claude AI based on your actual data.',pos:'bottom'},
+
+  {target:'t-tools',title:'Power Tools',text:'Scan receipts, use voice input, generate shareable cards, and export reports.',pos:'bottom'},
+
+  {target:'t-goals',title:'Set Goals',text:'Set weekly or monthly reduction targets and track your progress daily.',pos:'bottom'},
+
+  {target:'apikeyInput',title:'Add Your API Key',text:'Paste a Claude or Gemini API key here — AI features unlock instantly after validation.',pos:'top'},
+
+];
+
+let _tutStep=0;
+
+function startTutorial(){
+
+  _tutStep=0;
+
+  showTutStep();
+
+}
+
+function showTutStep(){
+
+  document.querySelectorAll('.tutorial-highlight').forEach(el=>el.classList.remove('tutorial-highlight'));
+
+  const overlay=document.getElementById('tutorialOverlay');
+
+  if(!overlay) return; // overlay markup missing — bail safely instead of throwing
+
+  if(_tutStep>=TUTORIAL_STEPS.length){ overlay.style.display='none'; return; }
+
+  const step=TUTORIAL_STEPS[_tutStep];
+
+  const target=document.getElementById(step.target);
+
+  if(!target){ nextTutStep(); return; }
+
+  target.classList.add('tutorial-highlight');
+
+  const rect=target.getBoundingClientRect();
+
+  const tip=document.getElementById('tutorialTip');
+
+  const tipTitle=document.getElementById('tutTipTitle');
+
+  const tipText=document.getElementById('tutTipText');
+
+  const tipCount=document.getElementById('tutStepCount');
+
+  if(!tip||!tipTitle||!tipText||!tipCount) return;
+
+  tipTitle.textContent=step.title;
+
+  tipText.textContent=step.text;
+
+  tipCount.textContent=(_tutStep+1)+' / '+TUTORIAL_STEPS.length;
+
+  overlay.style.display='block';
+
+  const top = step.pos==='bottom'?rect.bottom+12:rect.top-140;
+
+  const left = Math.min(Math.max(rect.left,10), window.innerWidth-260);
+
+  tip.style.cssText=`position:fixed;top:${top}px;left:${left}px;z-index:8000;max-width:240px`;
+
+}
+
+function nextTutStep(){ _tutStep++; showTutStep(); }
+
+function skipTutorial(){
+
+  document.getElementById('tutorialOverlay').style.display='none';
+
+  document.querySelectorAll('.tutorial-highlight').forEach(el=>el.classList.remove('tutorial-highlight'));
+
+  try{ localStorage.setItem('eco3_tutorial','done'); }catch(e){}
+
+}
+
+// Auto-start tutorial for new users
+
+function maybeStartTutorial(){
+
+  try{
+
+    if(!localStorage.getItem('eco3_tutorial')) setTimeout(startTutorial, 1200);
+
+  }catch(e){}
+
+}
+
+// -------------------------------------------
+
+// INDIA CITY MODE
+
+// -------------------------------------------
+
+const CITY_FACTORS={
+
+  delhi:   {grid:0.95,rickshaw:0.09,desc:'High coal dependency'},
+
+  mumbai:  {grid:0.82,rickshaw:0.07,desc:'Mix of hydro + thermal'},
+
+  bangalore:{grid:0.78,rickshaw:0.07,desc:'Growing renewable share'},
+
+  chennai: {grid:0.80,rickshaw:0.07,desc:'Strong solar adoption'},
+
+  patna:   {grid:0.97,rickshaw:0.09,desc:'BSEB grid — coal heavy'},
+
+  hyderabad:{grid:0.84,rickshaw:0.08,desc:'Industrial + some solar'},
+
+  kolkata: {grid:0.86,rickshaw:0.08,desc:'CESC + thermal mix'},
+
+  pune:    {grid:0.79,rickshaw:0.07,desc:'MSEDCL clean mix'},
+
+  default: {grid:0.85,rickshaw:0.089,desc:'National avg (CEA 2023)'}
+
+};
+
+function applyCity(){
+
+  const city=(document.getElementById('citySelect')?.value||'default');
+
+  const factors=CITY_FACTORS[city]||CITY_FACTORS.default;
+
+  // Patch CO2_FACTORS for electricity and bus based on city
+
+  CO2_FACTORS.elec=()=>parseFloat(v('in-elec-kwh')||0)*factors.grid;
+
+  CO2_FACTORS.ac=()=>{const h=parseFloat(v('in-ac-h')||0);const kw=parseFloat(v('in-ac-ton')||1.28);return h*kw*factors.grid;};
+
+  CO2_FACTORS.geyser=()=>{const m=parseFloat(v('in-geyser-m')||0);return(m/60)*2*factors.grid;};
+
+  CO2_FACTORS.bus=()=>parseFloat(v('in-bus-km')||0)*factors.rickshaw;
+
+  const infoEl=document.getElementById('cityInfo');
+
+  if(infoEl) infoEl.textContent=factors.desc+' • Grid factor: '+factors.grid+' kg CO2/kWh';
+
+  try{ localStorage.setItem('eco3_city',city); }catch(e){}
+
+  toast('City updated to '+city+' 🏙️','ok');
+
+}
+
+// Restore city on load
+
+document.addEventListener('DOMContentLoaded',()=>{
+
+  try{
+
+    const c=localStorage.getItem('eco3_city');
+
+    if(c){ const s=document.getElementById('citySelect'); if(s){ s.value=c; applyCity(); } }
+
+  }catch(e){}
+
+});
+
+function updateDash(){ renderDash(); }
+
+</script>
+
+</body>
+
+</html>
