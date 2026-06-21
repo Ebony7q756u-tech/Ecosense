@@ -1,0 +1,13 @@
+{
+  "name": "ecosense",
+  "version": "1.0.0",
+  "description": "EcoSense — Personal Carbon Intelligence. Track, understand and reduce your personal carbon footprint with India-specific emission factors and AI-powered insights.",
+  "private": true,
+  "scripts": {
+    "test": "node tests/run-tests.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "UNLICENSED"
+}

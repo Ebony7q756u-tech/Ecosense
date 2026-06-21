@@ -1,58 +1,119 @@
-# Ecosense
-An AI-powered personal carbon footprint tracker. Built for Hack2Skill PromptWars Challenge 3 using multimodal LLM prompting (Vision &amp; Audio) to calculate daily emission.
+# EcoSense — Personal Carbon Intelligence
 
+Track, understand and reduce your personal carbon footprint, with
+India-specific emission factors and AI-powered insights (Claude or
+Gemini — bring your own API key).
 
+Built as a single-page app with no build step, no framework, and no
+server: open `index.html` and it runs. All data stays on-device in
+`localStorage`.
 
-EcoSense: Personal Carbon Intelligence
+## Features
 
-EcoSense is an AI-powered carbon footprint tracker designed to make sustainability tracking frictionless. Instead of manually searching for emission factors, users can simply upload a picture of a receipt or speak naturally about their day, and the AI handles the data extraction and CO2 calculation.
+- **Activity logging** — Transport, Food & Diet, Home Energy, and
+  Shopping, each with India-calibrated emission factors (e.g. CEA 2023
+  grid intensity, Indian Railways averages).
+- **Carbon Score & Planetary Health Meter** — a 0–100 daily score and a
+  visual gauge of your footprint against a fair daily carbon budget.
+- **AI Insights** — daily/weekly analysis, a reduction plan, a monthly
+  forecast, a weekly coaching message, and a free-form AI chat, all
+  powered by a Claude or Gemini key you supply and which is sent only
+  to the official provider endpoints.
+- **Tools** — photo/receipt scanner (AI-read electricity bills,
+  receipts, fuel slips), voice logging, an "AI Debate Mode" that
+  fact-checks climate claims, India-specific carbon offset links, a
+  shareable carbon card, PDF/HTML report export, and city-level
+  emission-factor overrides (Delhi, Mumbai, Bengaluru, Chennai, Patna,
+  Hyderabad, Kolkata, Pune).
+- **Goals, Challenges & Achievements** — monthly targets with progress
+  rings, ten daily challenges, seven unlockable achievements, and a
+  weekly leaderboard.
+- **Compare & History** — your footprint vs. India/global/regional
+  averages, a 7-day trend chart, and full activity history.
+- **Accounts** — email/password auth (SHA-256 hashed, stored locally)
+  with a guest mode, session expiry + lock screen, and a first-run
+  onboarding flow that estimates a baseline footprint.
 
-Built for Hack2Skill: PromptWars (Challenge 3)
+## Running it
 
-🚀 Why This Fits PromptWars
+No install, no build:
 
-This project relies heavily on advanced prompt engineering and orchestration rather than a heavy backend:
+```
+open index.html
+```
 
-Multimodal Vision Prompting: Extracts structured JSON data (item quantities, fuel types, exact kWh) directly from user-uploaded images of electricity bills or grocery receipts.
+(or serve the folder with any static file server, e.g. `npx serve .`)
 
-Audio/Text Parsing: Uses specific LLM system constraints to translate natural language ("I took a 15km bus ride and ate dal rice") into calculated carbon metrics.
+AI features (Insights, Chat, Photo Scanner, Voice Logging, Debate Mode,
+Weekly Coach) require a Claude or Gemini API key, entered in the
+Dashboard's **AI API Keys** panel. Keys are stored only in the
+browser's `localStorage` and are sent only to the official Anthropic /
+Google endpoints (see the Content-Security-Policy `connect-src` in
+`index.html`).
 
-AI Debate Mode & Coaching: Features custom system prompts that act as a climate scientist to debate users on their sustainability claims or offer targeted weekly coaching.
+## Testing
 
-✨ Features
+A standalone, dependency-free Node test suite exercises the app's core
+calculation engine — `CO2_FACTORS`, `calcScore`, `getGrade`,
+`escapeHtml`, and all reference data tables — directly against the
+real `index.html`, with no mocking of the business logic itself (only
+the DOM is shimmed).
 
-Zero-Friction Logging: Log daily transport, food, energy, and shopping data.
+```
+npm test
+```
 
-Photo / Receipt Scanner (Vision AI): Upload a bill and the AI auto-fills your log.
+This also re-runs the app's own in-browser self-test panel
+(`runSelfTests()`, exposed in the running app via **Tools → Run
+Self-Tests** or the floating 🔧 button) and asserts every check in it
+passes too, so the in-app diagnostics and the CI suite can never
+silently drift apart.
 
-Voice Logging: Speak your daily activities to automatically calculate your footprint.
+CI runs the same suite on every push via GitHub Actions
+(`.github/workflows/test.yml`).
 
-Dynamic Dashboard: Real-time visual tracking of your weekly average, planetary health meter, and streak.
+## Architecture
 
-Localised Data (India Mode): Adjusts calculations based on regional Indian city grids.
+`index.html` is intentionally a single file (no bundler, no
+dependencies to install, easy to audit) but is internally organised
+into clearly-commented sections — see the architecture overview comment
+near the top of the `<script>` block:
 
-Shareable Assets: Generates social-ready carbon report cards and exportable PDF/HTML reports for blog submissions.
+1. **DATA** — static reference tables (countries, challenges,
+   achievements, emission factors, city factors)
+2. **UTILITIES** — `escapeHtml()`, `debounce()`, `safeLS*()` helpers
+   used throughout to keep rendering XSS-safe and input handling
+   efficient
+3. **STATE (`S`)** — a single in-memory store persisted to
+   `localStorage`, always accessed through the `safeLS*` wrappers so a
+   blocked or corrupted storage environment never crashes the app
+4. **CALCULATIONS** — `CO2_FACTORS` + `calcScore` + related pure
+   functions, kept side-effect-free so they're independently testable
+5. **RENDERING** — `render*()` functions that update the DOM
+6. **FEATURES** — auth, AI integration, voice input, photo scan, goals,
+   challenges, reports, offsets
+7. **DIAGNOSTICS** — the self-test harness described above
 
-🛠️ Tech Stack
+## Security & accessibility notes
 
-Frontend: Vanilla HTML, CSS, JavaScript (Zero dependencies, single-file architecture).
+- A strict `Content-Security-Policy` and `X-Content-Type-Options:
+  nosniff` are set via meta tags; only Anthropic, Google (Gemini +
+  Sign-In) and Google Fonts origins are allow-listed.
+- All AI/OCR/voice-parsed text is passed through `escapeHtml()` before
+  being inserted via `innerHTML`, to prevent stored/DOM XSS from
+  untrusted model output.
+- Passwords are SHA-256 hashed before storage (this is a client-only
+  demo with no backend — see the in-app note on the password-reset
+  screen).
+- An accessibility auto-enhancer runs on load and after every DOM
+  mutation, filling in missing `aria-label`s, marking decorative icons
+  `aria-hidden`, and giving the tab bar proper `role="tablist"`/`role="tab"`
+  semantics, without altering any existing markup or behaviour.
 
-AI Engine: Google Gemini 2.5 Flash / Anthropic Claude 3.5 Sonnet (Bring Your Own Key architecture).
+## Encoding
 
-Storage: Browser localStorage (No database required for the prototype).
-
---> How to Run It (For Judges)
-
-This app is a client-side prototype. It requires no installation, no server, and no npm packages.
-
-Open the live GitHub Pages link (or download and open index.html in Chrome).
-
-Click "Continue as Guest" or create a local test account.
-
-Go to the Dashboard tab.
-
-Paste a valid Gemini or Claude API Key into the "AI API KEYS" manager box and click "Validate & Save".
-
-Head over to the Tools tab to test the Voice Logging or Receipt Scanner!
-
-Security Note for Reviewers: Because this is a zero-dependency frontend prototype built for a hackathon, API calls are made directly from the browser. The "Bring Your Own Key" (BYOK) approach ensures user keys are only stored locally in the browser's localStorage and are never sent to a third-party backend.
+This repo intentionally pins UTF-8 + LF line endings via
+`.gitattributes` for every text file. The project previously lost all
+of its emoji and em dashes when a tool round-tripped the file through
+a non-UTF-8 codepage — if you edit `index.html`, make sure your editor
+saves as **UTF-8 without a BOM** to avoid a repeat.
